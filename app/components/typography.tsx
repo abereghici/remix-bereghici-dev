@@ -71,22 +71,18 @@ function H6(props: TitleProps) {
 
 type ParagraphProps = {
   className?: string
-  prose?: boolean
-  textColorClassName?: string
+  variant?: 'primary' | 'secondary'
   as?: React.ElementType
 } & ({children: React.ReactNode} | {dangerouslySetInnerHTML: {__html: string}})
 
 function Paragraph({
   className,
-  prose = true,
   as = 'p',
-  textColorClassName = 'text-secondary',
+  variant = 'primary',
   ...rest
 }: ParagraphProps) {
   return React.createElement(as, {
-    className: clsx('max-w-full text-lg', textColorClassName, className, {
-      'prose prose-light dark:prose-dark': prose,
-    }),
+    className: clsx('max-w-full text-lg', titleColors[variant], className),
     ...rest,
   })
 }

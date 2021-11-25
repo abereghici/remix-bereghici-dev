@@ -7,6 +7,7 @@ import {
   LoaderFunction,
   json,
   useLoaderData,
+  MetaFunction,
 } from 'remix'
 import type {LinksFunction} from 'remix'
 import {
@@ -41,6 +42,17 @@ export let links: LinksFunction = () => {
     {rel: 'icon', href: '/favicon.ico'},
     {rel: 'stylesheet', href: tailwindStyles},
   ]
+}
+
+export const meta: MetaFunction = () => {
+  const title = 'Alexandru Bereghici · bereghici.dev'
+  const description = 'Software engineer specializing in JavaScript ecosystem'
+  return {
+    viewport: 'width=device-width,initial-scale=1,viewport-fit=cover',
+    'theme-color': '#111111',
+    title,
+    description,
+  }
 }
 
 export type LoaderData = {
@@ -93,7 +105,9 @@ function App() {
       </head>
       <body className="bg-primary">
         <Navbar />
-        <Outlet />
+        <main id="main">
+          <Outlet />
+        </main>
         <Scripts />
         {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>

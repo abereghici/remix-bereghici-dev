@@ -11,6 +11,7 @@ export default function IndexRoute() {
       <H5>Test</H5>
       <H6>Test</H6>
       <Paragraph>This is a test</Paragraph>
+      <Paragraph variant="secondary">This is a test</Paragraph>
     </ResponsiveContainer>
   )
 }
