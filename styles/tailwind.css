@@ -42,12 +42,4 @@
   .text-inverse {
     @apply text-white dark:text-black;
   }
-
-  .border-primary {
-    @apply border-gray-900 dark:border-white;
-  }
-
-  .border-secondary {
-    @apply border-gray-200 dark:border-gray-600;
-  }
 }

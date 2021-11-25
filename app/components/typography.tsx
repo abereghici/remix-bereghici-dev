@@ -1,8 +1,10 @@
 import * as React from 'react'
 import clsx from 'clsx'
 
+type Variant = 'primary' | 'secondary' | 'inverse'
+
 type TitleProps = {
-  variant?: 'primary' | 'secondary'
+  variant?: Variant
   as?: React.ElementType
   className?: string
   id?: string
@@ -27,6 +29,7 @@ const fontSize = {
 const titleColors = {
   primary: 'text-primary',
   secondary: 'text-secondary',
+  inverse: 'text-inverse',
 }
 
 function Title({
@@ -71,7 +74,7 @@ function H6(props: TitleProps) {
 
 type ParagraphProps = {
   className?: string
-  variant?: 'primary' | 'secondary'
+  variant?: Variant
   as?: React.ElementType
 } & ({children: React.ReactNode} | {dangerouslySetInnerHTML: {__html: string}})
 
