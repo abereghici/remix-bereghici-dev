@@ -18,12 +18,9 @@ import {
 import {getThemeSession} from './utils/theme.server'
 import {getDomainUrl} from './utils/misc'
 import {pathedRoutes} from './other-routes.server'
-import Container from './components/container'
 import Navbar from './components/navbar'
 
 import tailwindStyles from './styles/tailwind.css'
-import proseStyles from './styles/prose.css'
-import appStyles from './styles/app.css'
 
 export let links: LinksFunction = () => {
   return [
@@ -43,8 +40,6 @@ export let links: LinksFunction = () => {
     },
     {rel: 'icon', href: '/favicon.ico'},
     {rel: 'stylesheet', href: tailwindStyles},
-    {rel: 'stylesheet', href: proseStyles},
-    {rel: 'stylesheet', href: appStyles},
   ]
 }
 
@@ -91,16 +86,14 @@ function App() {
       <head>
         <meta charSet="utf-8" />
         <Meta />
-        <Links />
         <NonFlashOfWrongThemeEls
           ssrTheme={Boolean(data.requestInfo.session.theme)}
         />
+        <Links />
       </head>
-      <body className="bg-primary transition duration-500">
-        <Container>
-          <Navbar />
-          <Outlet />
-        </Container>
+      <body className="bg-primary">
+        <Navbar />
+        <Outlet />
         <Scripts />
         {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>

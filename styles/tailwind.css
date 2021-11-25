@@ -1,6 +1,6 @@
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
+@tailwind components;
 
 @font-face {
   font-family: 'IBM Plex Sans';
@@ -20,11 +20,11 @@
 
 @layer utilities {
   .bg-primary {
-    @apply dark:bg-gray-900 bg-white;
+    @apply bg-gray-100 dark:bg-gray-900;
   }
 
   .bg-secondary {
-    @apply bg-gray-100 dark:bg-gray-800;
+    @apply dark:bg-gray-800 bg-white;
   }
 
   .bg-inverse {
