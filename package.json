@@ -17,9 +17,14 @@
     "@remix-run/react": "^1.0.5",
     "@remix-run/serve": "^1.0.5",
     "clsx": "^1.1.1",
+    "date-fns": "^2.26.0",
+    "esbuild": "^0.13.14",
+    "mdx-bundler": "^8.0.0",
+    "p-queue": "^7.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "6.0.2",
+    "reading-time": "^1.5.0",
     "remix": "^1.0.5"
   },
   "devDependencies": {

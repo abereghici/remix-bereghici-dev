@@ -42,7 +42,7 @@ export default function MobileMenu() {
         <ResponsiveContainer
           as="ul"
           className={clsx(
-            'md:hidden fixed w-full h-screen left-0 mt-2 bg-gray-100 dark:bg-gray-900',
+            'md:hidden fixed w-full h-screen left-0 mt-2 bg-gray-100 dark:bg-gray-900 z-10',
           )}
         >
           {LINKS.map(({to, name}) => (

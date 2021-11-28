@@ -50,6 +50,7 @@ export const meta: MetaFunction = () => {
   return {
     viewport: 'width=device-width,initial-scale=1,viewport-fit=cover',
     'theme-color': '#111111',
+    robots: 'index,follow',
     title,
     description,
   }
@@ -104,7 +105,9 @@ function App() {
         <Links />
       </head>
       <body className="bg-primary">
-        <Navbar />
+        <header>
+          <Navbar />
+        </header>
         <main id="main">
           <Outlet />
         </main>

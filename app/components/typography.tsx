@@ -75,6 +75,7 @@ function H6(props: TitleProps) {
 type ParagraphProps = {
   className?: string
   variant?: Variant
+  size?: 'small' | 'medium' | 'large'
   as?: React.ElementType
 } & ({children: React.ReactNode} | {dangerouslySetInnerHTML: {__html: string}})
 
@@ -82,10 +83,20 @@ function Paragraph({
   className,
   as = 'p',
   variant = 'primary',
+  size = 'medium',
   ...rest
 }: ParagraphProps) {
   return React.createElement(as, {
-    className: clsx('max-w-full text-lg', titleColors[variant], className),
+    className: clsx(
+      'max-w-full',
+      titleColors[variant],
+      {
+        'text-sm': size === 'small',
+        'text-md': size === 'medium',
+        'text-lg': size === 'large',
+      },
+      className,
+    ),
     ...rest,
   })
 }
