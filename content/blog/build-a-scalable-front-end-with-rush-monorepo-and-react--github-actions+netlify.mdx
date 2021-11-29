@@ -1,0 +1,373 @@
+---
+title: |
+  Build a scalable front-end with Rush monorepo and React — Github Actions + Netlify
+description: |
+  This is the 4th part of the blog series "Build a scalable front-end with Rush monorepo and React".
+  In this post we'll configure a deployment workflow with Github Actions and Netlify.
+date: 2021-08-19
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/build-a-scalable-front-end-with-rush-monorepo-and-react-part4_prj4ig"
+  imgProps={{alt: 'Rushjs logo'}}
+/>
+
+This is the 4th part of the blog series "Build a scalable front-end with Rush
+monorepo and React"
+
+- [Part 1](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--repo-setup+import-projects+prettier):
+  Monorepo setup, import projects with preserving git history, add Prettier
+
+- [Part 2](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--webpack+jest):
+  Create build tools package with Webpack and Jest
+
+- [Part 3](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--eslint+lint-staged):
+  Add shared ESLint configuration and use it with lint-staged
+
+- [Part 4](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--github-actions+netlify):
+  Setup a deployment workflow with Github Actions and Netlify.
+
+- [Part 5](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--vscode):
+  Add VSCode configurations for a better development experience.
+
+---
+
+#### TL;DR
+
+If you're interested in just see the code, you can find it here:
+[https://github.com/abereghici/rush-monorepo-boilerplate](https://github.com/abereghici/rush-monorepo-boilerplate)
+
+If you want to see an example with Rush used in a real, large project, you can
+look at [ITwin.js](https://github.com/imodeljs/imodeljs), an open-source project
+developed by Bentley Systems.
+
+---
+
+[Netlify](https://www.netlify.com/) allows you to configure the deployment of
+your project directly on their dashboard using a build command. This works well
+when you have a project in a single repository and you don't need to deploy it
+very often. They give you a free plan which includes only 300 free build
+minutes. On the other hand, Github Actions is more flexible and they give you
+2000 free build minutes. Also, you can run various tasks like "testing",
+"linting", "deployment", etc.
+
+#### Create a Netlify site
+
+- Create an account if you don't have one yet on Netlify and create a new site.
+- Go to the project settings and copy the API ID.
+- Open Github repository and go to the settings of the repository.
+- Click on "Secrets" and add a new secret with the name `NETLIFY_SITE_ID` and
+  paste the copied API ID from Netlify.
+- Go back to Netlify dashboard and open user settings.
+  [https://app.netlify.com/user/applications#personal-access-tokens](https://app.netlify.com/user/applications#personal-access-tokens)
+- Click on "Applications" and create a new access token.
+- Open Github "Secrets" and create a new secret with the name
+  `NETLIFY_AUTH_TOKEN` and paste the new access token created on Netlify.
+
+#### Create Github Actions workflow
+
+At this point, we have all credentials we need for deployment. Now, we can start
+writing our configurations.
+
+We need to add two more commands in `common/rush/command-line.json`: `lint` and
+`test`. We'll trigger them on CI/CD before building the project.
+
+In `common/rush/command-line.json` add the following:
+
+```json
+    {
+      "name": "test",
+      "commandKind": "bulk",
+      "summary": "Run tests on each package",
+      "description": "Iterates through each package in the monorepo and runs the 'test' script",
+      "enableParallelism": true,
+      "ignoreMissingScript": true,
+      "ignoreDependencyOrder": true,
+      "allowWarningsInSuccessfulBuild": true
+    },
+    {
+      "name": "lint",
+      "commandKind": "bulk",
+      "summary": "Run linter on each package",
+      "description": "Iterates through each package in the monorepo and runs the 'lint' script",
+      "enableParallelism": true,
+      "ignoreMissingScript": true,
+      "ignoreDependencyOrder": true,
+      "allowWarningsInSuccessfulBuild": false
+    }
+```
+
+In the root of monorepo, create a `.github/workflows` folder and create a new
+file named `main.yml`.
+
+```shell
+mkdir -p .github/workflows
+
+touch .github/workflows/main.yml
+```
+
+Now, let's write the configurations for Github Actions.
+
+```yaml
+# Name of workflow
+name: Main workflow
+
+# When workflow is triggered
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+# Jobs to carry out
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      # Get code from repo
+      - name: Checkout code
+        uses: actions/checkout@v1
+      # Install NodeJS
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      # Run rush install and build on our code
+      - name: Install dependencies
+        run: |
+          node common/scripts/install-run-rush.js change -v
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js build
+      # Run eslint to check all packages
+      - name: Lint packages
+        run: node common/scripts/install-run-rush.js lint
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    env:
+      CI: true
+    steps:
+      # Get code from repo
+      - name: Checkout code
+        uses: actions/checkout@v1
+      # Install NodeJS
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      # Run rush install
+      - name: Install dependencies
+        run: |
+          node common/scripts/install-run-rush.js change -v
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js build
+      # Run unit tests for all packages
+      - name: Run tests
+        run: node common/scripts/install-run-rush.js test
+  deploy:
+    # Operating system to run job on
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+        app-name: [react-app]
+        include:
+          - app-name: react-app
+            app: '@monorepo/react-app'
+            app-dir: 'apps/react-app'
+            app-build: 'apps/react-app/build'
+            site-id: NETLIFY_SITE_ID
+    needs: [lint, test]
+    # Steps in job
+    steps:
+      # Get code from repo
+      - name: Checkout code
+        uses: actions/checkout@v1
+      # Install NodeJS
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      # Run rush install and build on our code
+      - name: Install dependencies
+        run: |
+          node common/scripts/install-run-rush.js change -v
+          node common/scripts/install-run-rush.js install
+      - name: Build ${{ matrix.app-name }}
+        working-directory: ${{ matrix.app-dir }}
+        run: |
+          node $GITHUB_WORKSPACE/common/scripts/install-run-rush.js build --verbose --to ${{ matrix.app }}
+      - name: Deploy ${{ matrix.app-name }}
+        uses: nwtgck/actions-netlify@v1.2
+        with:
+          publish-dir: ${{ matrix.app-build }}
+          production-deploy: ${{ github.event_name != 'pull_request' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets[matrix.site-id] }}
+```
+
+Let's break down the configuration above.
+
+We have 3 jobs: `lint`, `test` and `deploy`. `lint` and `test` jobs will run in
+parallel and `deploy` job will run after both `lint` and `test` jobs are
+successfully done. We're using matrix to run jobs on different NodeJS versions
+(Currently we're using only `14.x` but can be extended to other versions).
+Matrix is also used to run the same build steps for multiple projects. At the
+moment, we have only `react-app` project, but it can be easily extended.
+
+We're running this workflow when the `master` branch is modified. For pull
+requests, Netlify will provide preview urls, but if we push something directly
+to `master` branch, it will trigger a `production` build and the code will be
+deployed to the main url.
+
+The main workflow we created is mostly suitable for development / staging
+environments. For production, you probably want to trigger the flow manually and
+create a `git tag`. You can create another site in Netlify, create a
+`PRODUCTION_NETLIFY_SITE_ID` secret in Github and use the following
+configuration:
+
+```yaml
+name: React App Production Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Bump Version
+        default: v1.0.0
+        required: true
+      git-ref:
+        description: Git Ref (Optional)
+        required: false
+# Jobs to carry out
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # Get code from repo
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref == ''
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+      # Install NodeJS
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      # Run rush install and build on our code
+      - name: Install dependencies
+        run: |
+          node common/scripts/install-run-rush.js change -v
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js build
+      # Run eslint to check all packages
+      - name: Lint packages
+        run: node common/scripts/install-run-rush.js lint
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      # Get code from repo
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref == ''
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+      # Install NodeJS
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      # Run rush install
+      - name: Install dependencies
+        run: |
+          node common/scripts/install-run-rush.js change -v
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js build
+      # Run unit tests for all packages
+      - name: Run tests
+        run: node common/scripts/install-run-rush.js test
+  deploy:
+    # Operating system to run job on
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    # Steps in job
+    steps:
+      # Get code from repo
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref == ''
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+      # Install NodeJS
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      # Run rush install and build on our code
+      - name: Install dependencies
+        run: |
+          node common/scripts/install-run-rush.js change -v
+          node common/scripts/install-run-rush.js install
+      # Build app
+      - name: Build react app
+        working-directory: apps/react-app
+        run: |
+          node  $GITHUB_WORKSPACE/common/scripts/install-run-rush.js build --verbose --to @monorepo/react-app
+      - name: Deploy react app
+        uses: nwtgck/actions-netlify@v1.2
+        with:
+          publish-dir: apps/react-app/build
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.PRODUCTION_NETLIFY_SITE_ID }}
+      # Create release tag
+      - name: Create tag
+        run: |
+          git tag ${{ github.event.inputs.version }}
+          git push origin --tags
+```
+
+Now we can trigger a production deploy manually for `react-app` project. We can
+provide the next version number as a `version` parameter and it will create a
+tag for us. If we want to revert to a previous version, you can also do it by
+providing a `git-ref`.
+
+If you encountered any issues during the process, you can see the code related
+to this post [here](https://github.com/abereghici/rush-monorepo-boilerplate).
+
+If you're using VSCode, you might be interested to see some configurations that
+can enrich your development experience with this monorepo. See the
+[next](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--vscode)
+post.

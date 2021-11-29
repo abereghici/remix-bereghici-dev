@@ -1,0 +1,756 @@
+---
+title: |
+  Build a scalable front-end with Rush monorepo and React — Webpack + Jest
+description: |
+  This is the 2nd part of the blog series "Build a scalable front-end with Rush monorepo and React".
+  In this post we'll create a build tools package with Webpack and Jest.
+date: 2021-08-17
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/build-a-scalable-front-end-with-rush-monorepo-and-react-part2_vs2q4l"
+  imgProps={{alt: 'Rushjs logo'}}
+/>
+
+This is the 2nd part of the blog series "Build a scalable front-end with Rush
+monorepo and React"
+
+- [Part 1](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--repo-setup+import-projects+prettier):
+  Monorepo setup, import projects with preserving git history, add Prettier
+
+- [Part 2](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--webpack+jest):
+  Create build tools package with Webpack and Jest
+
+- [Part 3](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--eslint+lint-staged):
+  Add shared ESLint configuration and use it with lint-staged
+
+- [Part 4](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--github-actions+netlify):
+  Setup a deployment workflow with Github Actions and Netlify.
+
+- [Part 5](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--vscode):
+  Add VSCode configurations for a better development experience.
+
+---
+
+#### TL;DR
+
+If you're interested in just see the code, you can find it here:
+[https://github.com/abereghici/rush-monorepo-boilerplate](https://github.com/abereghici/rush-monorepo-boilerplate)
+
+If you want to see an example with Rush used in a real, large project, you can
+look at [ITwin.js](https://github.com/imodeljs/imodeljs), an open-source project
+developed by Bentley Systems.
+
+---
+
+[create-react-app](https://create-react-app.dev/) is a great tool that allows
+you to develop react applications without having to manually configure build
+tools. When you develop small projects, it might be overkill to manage your own
+build tools and CRA is more than enough, but when you start to build large
+projects you might find CRA configuration lacking. CRA is an opinionated
+pre-configured tool, so there will always be some settings that you aren't happy
+with and you cannot change them.
+
+In this post, we'll create our own build tools, based on
+[create-react-app](https://create-react-app.dev/). This will give us full
+control over the build process.
+
+#### Create react-scripts package
+
+Let's create a new folder for `react-scripts` package.
+
+```bash
+mkdir -p packages/react-scripts
+```
+
+Create a `package.json` file inside the `react-scripts` folder and add the
+following configuration:
+
+```json
+{
+  "name": "@monorepo/react-scripts",
+  "version": "1.0.0",
+  "files": ["bin", "config", "lib", "scripts", "utils"],
+  "bin": {
+    "react-scripts": "./bin/react-scripts.js"
+  },
+  "types": "./lib/react-app.d.ts",
+  "dependencies": {
+    "@babel/core": "7.12.3",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
+    "@svgr/webpack": "5.5.0",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "@types/jest": "^26.0.24",
+    "@types/node": "^12.20.19",
+    "@types/react": "^17.0.18",
+    "@types/react-dom": "^17.0.9",
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.6.0",
+    "babel-loader": "8.1.0",
+    "babel-plugin-named-asset-import": "^0.3.7",
+    "babel-preset-react-app": "^10.0.0",
+    "bfj": "^7.0.2",
+    "camelcase": "^6.1.0",
+    "case-sensitive-paths-webpack-plugin": "2.3.0",
+    "css-loader": "4.3.0",
+    "dotenv": "8.2.0",
+    "dotenv-expand": "5.1.0",
+    "file-loader": "6.1.1",
+    "fs-extra": "^9.0.1",
+    "html-webpack-plugin": "4.5.0",
+    "identity-obj-proxy": "3.0.0",
+    "jest": "26.6.0",
+    "jest-circus": "26.6.0",
+    "jest-resolve": "26.6.0",
+    "jest-watch-typeahead": "0.6.1",
+    "mini-css-extract-plugin": "0.11.3",
+    "optimize-css-assets-webpack-plugin": "5.0.4",
+    "pnp-webpack-plugin": "1.6.4",
+    "postcss-flexbugs-fixes": "4.2.1",
+    "postcss-loader": "3.0.0",
+    "postcss-normalize": "8.0.1",
+    "postcss-preset-env": "6.7.0",
+    "postcss-safe-parser": "5.0.2",
+    "prompts": "2.4.0",
+    "react-app-polyfill": "^2.0.0",
+    "react-dev-utils": "^11.0.3",
+    "react-refresh": "^0.8.3",
+    "resolve": "1.18.1",
+    "resolve-url-loader": "^3.1.2",
+    "sass-loader": "^10.0.5",
+    "semver": "7.3.2",
+    "style-loader": "1.3.0",
+    "terser-webpack-plugin": "4.2.3",
+    "ts-pnp": "1.2.0",
+    "url-loader": "4.1.1",
+    "web-vitals": "^1.1.2",
+    "webpack": "4.44.2",
+    "webpack-dev-server": "3.11.1",
+    "webpack-manifest-plugin": "2.2.0",
+    "workbox-webpack-plugin": "5.1.4"
+  },
+  "devDependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  }
+}
+```
+
+As you already noticed, we moved all build dependencies from `react-app` project
+to `react-scripts` package.
+
+Move `config` and `scripts` folders from `react-app` to `react-scripts` and
+let's adjust the configurations.
+
+Remove `ESLint` plugin and its dependencies from
+`packages/react-scripts/config/webpack.config.js`. We'll use it later as a
+separate action in our build process.
+
+Open `packages/react-scripts/config/paths.js` and replace the file content with:
+
+```js
+const path = require('path')
+const fs = require('fs')
+const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath')
+
+// Make sure any symlinks in the project folder are resolved:
+// https://github.com/facebook/create-react-app/issues/637
+const appDirectory = fs.realpathSync(process.cwd())
+const resolveApp = relativePath => path.resolve(appDirectory, relativePath)
+
+// We use `PUBLIC_URL` environment variable or "homepage" field to infer
+// "public path" at which the app is served.
+// webpack needs to know it to put the right <script> hrefs into HTML even in
+// single-page apps that may serve index.html for nested URLs like /todos/42.
+// We can't use a relative path in HTML because we don't want to load something
+// like /todos/42/static/js/bundle.7289d.js. We have to know the root.
+const publicUrlOrPath = getPublicUrlOrPath(
+  process.env.NODE_ENV === 'development',
+  require(resolveApp('package.json')).homepage,
+  process.env.PUBLIC_URL,
+)
+
+const buildPath = process.env.BUILD_PATH || 'build'
+
+const moduleFileExtensions = [
+  'web.mjs',
+  'mjs',
+  'web.js',
+  'js',
+  'web.ts',
+  'ts',
+  'web.tsx',
+  'tsx',
+  'json',
+  'web.jsx',
+  'jsx',
+]
+
+// Resolve file paths in the same order as webpack
+const resolveModule = (resolveFn, filePath) => {
+  const extension = moduleFileExtensions.find(extension =>
+    fs.existsSync(resolveFn(`${filePath}.${extension}`)),
+  )
+
+  if (extension) {
+    return resolveFn(`${filePath}.${extension}`)
+  }
+
+  return resolveFn(`${filePath}.js`)
+}
+
+const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath)
+
+module.exports = {
+  dotenv: resolveApp('.env'),
+  appPath: resolveApp('.'),
+  appBuild: resolveApp(buildPath),
+  appPublic: resolveApp('public'),
+  appHtml: resolveApp('public/index.html'),
+  appIndexJs: resolveModule(resolveApp, 'src/index'),
+  appPackageJson: resolveApp('package.json'),
+  appSrc: resolveApp('src'),
+  appTsConfig: resolveApp('tsconfig.json'),
+  appJsConfig: resolveApp('jsconfig.json'),
+  yarnLockFile: resolveApp('yarn.lock'),
+  testsSetup: resolveModule(resolveApp, 'src/setupTests'),
+  proxySetup: resolveApp('src/setupProxy.js'),
+  appNodeModules: resolveApp('node_modules'),
+  appWebpackCache: resolveApp('node_modules/.cache'),
+  appTsBuildInfoFile: resolveApp('node_modules/.cache/tsconfig.tsbuildinfo'),
+  swSrc: resolveModule(resolveApp, 'src/service-worker'),
+  publicUrlOrPath,
+  // These properties only exist before ejecting:
+  ownPath: resolveOwn('.'),
+  ownNodeModules: resolveOwn('node_modules'), // This is empty on npm 3
+  appTypeDeclarations: resolveApp('src/react-app-env.d.ts'),
+  ownTypeDeclarations: resolveOwn('lib/react-app.d.ts'),
+}
+
+module.exports.moduleFileExtensions = moduleFileExtensions
+```
+
+The most important change in this file is the `resolveApp` function call. We
+shouldn't use relative paths anymore, because we are moving the configuration
+files to `react-scripts` package. We'll get the project files paths using a
+combination between `path.resolve` and `process.cwd()`.
+
+Create a `bin` folder and in `react-scripts.js` file add the following code:
+
+```js
+process.on('unhandledRejection', err => {
+  throw err
+})
+
+const spawn = require('react-dev-utils/crossSpawn')
+const args = process.argv.slice(2)
+
+const scriptIndex = args.findIndex(
+  x => x === 'build' || x === 'start' || x === 'test',
+)
+const script = scriptIndex === -1 ? args[0] : args[scriptIndex]
+const nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : []
+
+if (['build', 'start', 'test'].includes(script)) {
+  const result = spawn.sync(
+    process.execPath,
+    nodeArgs
+      .concat(require.resolve('../scripts/' + script))
+      .concat(args.slice(scriptIndex + 1)),
+    {stdio: 'inherit'},
+  )
+  if (result.signal) {
+    if (result.signal === 'SIGKILL') {
+      console.log(
+        'The build failed because the process exited too early. ' +
+          'This probably means the system ran out of memory or someone called ' +
+          '`kill -9` on the process.',
+      )
+    } else if (result.signal === 'SIGTERM') {
+      console.log(
+        'The build failed because the process exited too early. ' +
+          'Someone might have called `kill` or `killall`, or the system could ' +
+          'be shutting down.',
+      )
+    }
+    process.exit(1)
+  }
+  process.exit(result.status)
+} else {
+  console.log('Unknown script "' + script + '".')
+}
+```
+
+This will be the entry-point of our CLI. Every time when you'll want to add a
+new command you have to adjust this file.
+
+Create another folder named `lib` and in `react-app.d.ts` file add the following
+code:
+
+```ts
+/// <reference types="node" />
+/// <reference types="react" />
+/// <reference types="react-dom" />
+
+declare namespace NodeJS {
+  interface ProcessEnv {
+    readonly NODE_ENV: 'development' | 'production' | 'test'
+    readonly PUBLIC_URL: string
+  }
+}
+
+declare module '*.avif' {
+  const src: string
+  export default src
+}
+
+declare module '*.bmp' {
+  const src: string
+  export default src
+}
+
+declare module '*.gif' {
+  const src: string
+  export default src
+}
+
+declare module '*.jpg' {
+  const src: string
+  export default src
+}
+
+declare module '*.jpeg' {
+  const src: string
+  export default src
+}
+
+declare module '*.png' {
+  const src: string
+  export default src
+}
+
+declare module '*.webp' {
+  const src: string
+  export default src
+}
+
+declare module '*.svg' {
+  import * as React from 'react'
+
+  export const ReactComponent: React.FunctionComponent<
+    React.SVGProps<SVGSVGElement> & {title?: string}
+  >
+
+  const src: string
+  export default src
+}
+
+declare module '*.module.css' {
+  const classes: {readonly [key: string]: string}
+  export default classes
+}
+
+declare module '*.module.scss' {
+  const classes: {readonly [key: string]: string}
+  export default classes
+}
+
+declare module '*.module.sass' {
+  const classes: {readonly [key: string]: string}
+  export default classes
+}
+```
+
+Here we'll store all type definitions for css, sass, scss and image files and
+we'll reuse in all react applications inside of the monorepo. You can address to
+these type definitions by creating a file in your react project named
+`react-app-env.d.ts` with the following content:
+
+```ts
+/// <reference types="@monorepo/react-scripts" />
+```
+
+Now let's register `@monorepo/react-scripts` package in rush configuration file.
+Open `rush.json` file and add an entry like this under the projects inventory:
+
+```json
+. . .
+ "projects": [
+    {
+      "packageName": "@monorepo/react-scripts",
+      "projectFolder": "packages/react-scripts",
+      "reviewCategory": "tools"
+    }
+  ]
+. . .
+```
+
+Now, let's cleanup `apps/react-app/package-json` file by removing all
+dependencies related to build tools. We'll also remove the configurations for
+`eslint`, `babel` or `jest`, because we'll store them in a separate files. In
+our dependencies we'll list `@monorepo/react-scripts` package.
+
+Edit `apps/react-app/package.json` file and add the following configuration:
+
+```json
+{
+  "name": "@monorepo/react-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "@types/jest": "^26.0.24",
+    "@types/react": "^17.0.18",
+    "@types/react-dom": "^17.0.9",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "typescript": "^4.3.5",
+    "web-vitals": "^1.1.2",
+    "@monorepo/react-scripts": "1.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test"
+  }
+}
+```
+
+Run `rush update` to install all dependencies and let's try to build our app
+with the `react-script` package we just created.
+
+```bash
+cd apps/react-app
+
+rushx build
+```
+
+#### Setup BrowserList
+
+By default, `react-scripts` expect to find a `browserslist` configuration in
+each project, otherwise, it fallbacks to the default `browserslist`
+configuration. If you want to use the same configuration for all your projects,
+you can modify `packages/react-scripts/build.js` to use `browserslist` from
+`package.json` from `@monorepo/react-scripts`.
+
+Open `package.json` from `@monorepo/react-scripts` and add the following
+configuration:
+
+```json
+"browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+```
+
+Modify the `checkBrowsers` function call from `packages/react-scripts/build.js`
+and `packages/react-scripts/start.js` with:
+
+```shell
+checkBrowsers(paths.ownPath, isInteractive)
+```
+
+#### Setup Jest
+
+Our current `test` script expects to find a `jest` configuration in each
+project. We'll modify it to use a shared configuration.
+
+Create a `utils` folder in `packages/react-scripts/scripts` and in
+`createJestConfig.js` file add the following:
+
+```js
+const fs = require('fs')
+const chalk = require('react-dev-utils/chalk')
+const paths = require('../../config/paths')
+const modules = require('../../config/modules')
+
+module.exports = (resolve, rootDir, isEjecting) => {
+  // Use this instead of `paths.testsSetup` to avoid putting
+  // an absolute filename into configuration after ejecting.
+  const setupTestsMatches = paths.testsSetup.match(/src[/\\]setupTests\.(.+)/)
+  const setupTestsFileExtension =
+    (setupTestsMatches && setupTestsMatches[1]) || 'js'
+  const setupTestsFile = fs.existsSync(paths.testsSetup)
+    ? `<rootDir>/src/setupTests.${setupTestsFileExtension}`
+    : undefined
+
+  const config = {
+    roots: ['<rootDir>/src'],
+
+    collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!src/**/*.d.ts'],
+
+    setupFiles: [
+      isEjecting
+        ? 'react-app-polyfill/jsdom'
+        : require.resolve('react-app-polyfill/jsdom'),
+    ],
+
+    setupFilesAfterEnv: setupTestsFile ? [setupTestsFile] : [],
+    testMatch: [
+      '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+      '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',
+    ],
+    testEnvironment: 'jsdom',
+    testRunner: require.resolve('jest-circus/runner'),
+    transform: {
+      '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': resolve(
+        'config/jest/babelTransform.js',
+      ),
+      '^.+\\.css$': resolve('config/jest/cssTransform.js'),
+      '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)': resolve(
+        'config/jest/fileTransform.js',
+      ),
+    },
+    transformIgnorePatterns: [
+      '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$',
+      '^.+\\.module\\.(css|sass|scss)$',
+    ],
+    modulePaths: modules.additionalModulePaths || [],
+    moduleNameMapper: {
+      '^react-native$': 'react-native-web',
+      '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+      ...(modules.jestAliases || {}),
+    },
+    moduleFileExtensions: [...paths.moduleFileExtensions, 'node'].filter(
+      ext => !ext.includes('mjs'),
+    ),
+    watchPlugins: [
+      'jest-watch-typeahead/filename',
+      'jest-watch-typeahead/testname',
+    ],
+    resetMocks: true,
+  }
+  if (rootDir) {
+    config.rootDir = rootDir
+  }
+  const overrides = Object.assign({}, require(paths.appPackageJson).jest)
+  const supportedKeys = [
+    'clearMocks',
+    'collectCoverageFrom',
+    'coveragePathIgnorePatterns',
+    'coverageReporters',
+    'coverageThreshold',
+    'displayName',
+    'extraGlobals',
+    'globalSetup',
+    'globalTeardown',
+    'moduleNameMapper',
+    'resetMocks',
+    'resetModules',
+    'restoreMocks',
+    'snapshotSerializers',
+    'testMatch',
+    'transform',
+    'transformIgnorePatterns',
+    'watchPathIgnorePatterns',
+  ]
+  if (overrides) {
+    supportedKeys.forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(overrides, key)) {
+        if (Array.isArray(config[key]) || typeof config[key] !== 'object') {
+          // for arrays or primitive types, directly override the config key
+          config[key] = overrides[key]
+        } else {
+          // for object types, extend gracefully
+          config[key] = Object.assign({}, config[key], overrides[key])
+        }
+
+        delete overrides[key]
+      }
+    })
+    const unsupportedKeys = Object.keys(overrides)
+    if (unsupportedKeys.length) {
+      const isOverridingSetupFile =
+        unsupportedKeys.indexOf('setupFilesAfterEnv') > -1
+
+      if (isOverridingSetupFile) {
+        console.error(
+          chalk.red(
+            'We detected ' +
+              chalk.bold('setupFilesAfterEnv') +
+              ' in your package.json.\n\n' +
+              'Remove it from Jest configuration, and put the initialization code in ' +
+              chalk.bold('src/setupTests.js') +
+              '.\nThis file will be loaded automatically.\n',
+          ),
+        )
+      } else {
+        console.error(
+          chalk.red(
+            '\nOut of the box, Create React App only supports overriding ' +
+              'these Jest options:\n\n' +
+              supportedKeys
+                .map(key => chalk.bold('  \u2022 ' + key))
+                .join('\n') +
+              '.\n\n' +
+              'These options in your package.json Jest configuration ' +
+              'are not currently supported by Create React App:\n\n' +
+              unsupportedKeys
+                .map(key => chalk.bold('  \u2022 ' + key))
+                .join('\n') +
+              '\n\nIf you wish to override other Jest options, you need to ' +
+              'eject from the default setup. You can do so by running ' +
+              chalk.bold('npm run eject') +
+              ' but remember that this is a one-way operation. ' +
+              'You may also file an issue with Create React App to discuss ' +
+              'supporting more options out of the box.\n',
+          ),
+        )
+      }
+
+      process.exit(1)
+    }
+  }
+  return config
+}
+```
+
+Now let's use this configuration. Modify the `test` script in
+`packages/react-scripts/scripts/test.js` to look like this:
+
+```js
+// Do this as the first thing so that any code reading it knows the right env.
+process.env.BABEL_ENV = 'test'
+process.env.NODE_ENV = 'test'
+process.env.PUBLIC_URL = ''
+
+process.on('unhandledRejection', err => {
+  throw err
+})
+
+// Ensure environment variables are read.
+require('../config/env')
+
+const jest = require('jest')
+const execSync = require('child_process').execSync
+let argv = process.argv.slice(2)
+
+function isInGitRepository() {
+  try {
+    execSync('git rev-parse --is-inside-work-tree', {stdio: 'ignore'})
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
+function isInMercurialRepository() {
+  try {
+    execSync('hg --cwd . root', {stdio: 'ignore'})
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
+// Watch unless on CI or explicitly running all tests
+if (
+  !process.env.CI &&
+  argv.indexOf('--watchAll') === -1 &&
+  argv.indexOf('--watchAll=false') === -1
+) {
+  // https://github.com/facebook/create-react-app/issues/5210
+  const hasSourceControl = isInGitRepository() || isInMercurialRepository()
+  argv.push(hasSourceControl ? '--watch' : '--watchAll')
+}
+
+const createJestConfig = require('./utils/createJestConfig')
+const path = require('path')
+const paths = require('../config/paths')
+argv.push(
+  '--config',
+  JSON.stringify(
+    createJestConfig(
+      relativePath => path.resolve(__dirname, '..', relativePath),
+      path.resolve(paths.appSrc, '..'),
+      false,
+    ),
+  ),
+)
+
+// This is a very dirty workaround for https://github.com/facebook/jest/issues/5913.
+// We're trying to resolve the environment ourselves because Jest does it incorrectly.
+// TODO: remove this as soon as it's fixed in Jest.
+const resolve = require('resolve')
+function resolveJestDefaultEnvironment(name) {
+  const jestDir = path.dirname(
+    resolve.sync('jest', {
+      basedir: __dirname,
+    }),
+  )
+  const jestCLIDir = path.dirname(
+    resolve.sync('jest-cli', {
+      basedir: jestDir,
+    }),
+  )
+  const jestConfigDir = path.dirname(
+    resolve.sync('jest-config', {
+      basedir: jestCLIDir,
+    }),
+  )
+  return resolve.sync(name, {
+    basedir: jestConfigDir,
+  })
+}
+let cleanArgv = []
+let env = 'jsdom'
+let next
+do {
+  next = argv.shift()
+  if (next === '--env') {
+    env = argv.shift()
+  } else if (next.indexOf('--env=') === 0) {
+    env = next.substring('--env='.length)
+  } else {
+    cleanArgv.push(next)
+  }
+} while (argv.length > 0)
+argv = cleanArgv
+let resolvedEnv
+try {
+  resolvedEnv = resolveJestDefaultEnvironment(`jest-environment-${env}`)
+} catch (e) {
+  // ignore
+}
+if (!resolvedEnv) {
+  try {
+    resolvedEnv = resolveJestDefaultEnvironment(env)
+  } catch (e) {
+    // ignore
+  }
+}
+const testEnvironment = resolvedEnv || env
+argv.push('--env', testEnvironment)
+
+jest.run(argv)
+```
+
+Now we can run `rushx test` inside of `react-app` project and test the shared
+configuration.
+
+If you encountered any issues during the process, you can check all changes in
+[this commit](https://github.com/abereghici/rush-monorepo-boilerplate/commit/de30f0a1bc1f3958e34bcccf7089d3439d153e2c).
+
+In the
+[next part](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--eslint+lint-staged)
+we'll add a shared ESLint configuration and we'll integrate it with
+[lint-staged](https://github.com/okonet/lint-staged).

@@ -9,13 +9,13 @@ export default function BlogPost({
 }: Pick<Post, 'title' | 'description' | 'slug'>) {
   const views = 0
   return (
-    <Link to={slug} className="block mb-8">
-      <div className="flex flex-col justify-between md:flex-row w-full">
-        <H4 className="mb-2">{title}</H4>
-        <Paragraph variant="secondary" className="mb-4">
-          {`${views ? new Number(views).toLocaleString() : '–'} views`}
-        </Paragraph>
-      </div>
+    <Link to={slug} className="block mb-10 group">
+      <H4 className="mb-2 group-hover:underline group-focus-within:underline">
+        {title}
+      </H4>
+      <Paragraph variant="secondary" className="mb-4">
+        {`${views ? new Number(views).toLocaleString() : '–'} views`}
+      </Paragraph>
       <Paragraph variant="secondary">{description}</Paragraph>
     </Link>
   )

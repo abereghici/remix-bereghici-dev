@@ -1,0 +1,302 @@
+---
+title: |
+  Build a scalable front-end with Rush monorepo and React — Repo Setup + Import projects + Prettier
+description: |
+  This is the 1st part of the blog series "Build a scalable front-end with Rush monorepo and React".
+  In this post, we'll init a new Rush monorepo and we'll import the projects without losing git history.
+  We'll also add Prettier to format the code for the entire repository.
+date: 2021-08-16
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/build-a-scalable-front-end-with-rush-monorepo-and-react-part1_tyahtq"
+  imgProps={{alt: 'Rushjs logo'}}
+/>
+
+This is the 1st part of the blog series "Build a scalable front-end with Rush
+monorepo and React"
+
+- [Part 1](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--repo-setup+import-projects+prettier):
+  Monorepo setup, import projects with preserving git history, add Prettier
+
+- [Part 2](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--webpack+jest):
+  Create build tools package with Webpack and react-scripts
+
+- [Part 3](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--eslint+lint-staged):
+  Add shared ESLint configuration and use it with lint-staged
+
+- [Part 4](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--github-actions+netlify):
+  Setup a deployment workflow with Github Actions and Netlify.
+
+- [Part 5](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--vscode):
+  Add VSCode configurations for a better development experience.
+
+---
+
+In a multi-repository project structure, it's only a matter of time when you'll
+need to reuse some code from one project to another. Adopting a monorepo
+architecture can help the team share and contribute code in a simple manner. I
+won't cover in this article the pros and cons of choosing this approach, because
+there are plenty of resources that debate this topic, instead, I'll focus on the
+implementation of a scalable monorepo using Rush.js and React.
+
+#### Tools
+
+We'll be using the following tools:
+
+- [Rush](https://rushjs.io/)
+- [React](https://reactjs.org/)
+- [Typescript](https://www.typescriptlang.org/)
+- [ESLint](https://eslint.org/)
+- [Webpack](https://webpack.js.org/)
+- [Prettier](https://prettier.io/)
+- [Lint-staged](https://github.com/okonet/lint-staged)
+- [Github Actions](https://github.com/features/actions)
+- [Netlify](https://www.netlify.com/)
+
+#### Goals
+
+Before implementing the monorepo, let's define the goals we want to achieve
+using these tools:
+
+- Multiple applications
+- Code sharing between applications
+- Shared tools and configurations
+- Enforced rules for code quality
+- Automated workflow for development
+
+#### TL;DR
+
+If you're interested in just see the code, you can find it here:
+[https://github.com/abereghici/rush-monorepo-boilerplate](https://github.com/abereghici/rush-monorepo-boilerplate)
+
+If you want to see an example with Rush used in a real, large project, you can
+look at [ITwin.js](https://github.com/imodeljs/imodeljs), an open-source project
+developed by Bentley Systems.
+
+#### Guide
+
+##### Create a new repository
+
+I assume you already created an empty Github repository for this project. Let's
+clone it locally and let the magic begin!
+
+##### Initialize the rush monorepo
+
+Inside of your project folder, run the following commands:
+
+```bash
+npm install -g @microsoft/rush
+
+rush init
+```
+
+After this command, you'll see a bunch of files and folders created. You can
+check the config files reference
+[here](https://rushjs.io/pages/advanced/config_files/).
+
+At this point, we can remove unnecessary files and create our first commit.
+
+```bash
+rm -rf .travis.yml
+
+git add .
+git commit -m "Initial commit"
+git push origin master
+```
+
+##### Import existing projects without loosing git history
+
+You don't really want to perform a migration to monorepo if you lose all the
+history of your projects. If everything will point to the commit where you
+merged the projects, you won't be able to revert to the previous commits, or run
+`git blame` or `git bisect`.
+
+We can copy all projects inside of the monorepo and keep the git history of each
+project with a single git command: `git subtree`.
+
+Let's suppose we want to import the following project into our monorepo
+[https://github.com/abereghici/react-app](https://github.com/abereghici/react-app).
+We'll do it using the command `git subtree add`
+
+```bash
+git subtree add --prefix apps/react-app \
+ https://github.com/abereghici/react-app master
+```
+
+Let's decode the parameters of this command:
+
+- `apps/react-app` is used to specify the path inside of the monorepo where the
+  project will be imported.
+- `https://github.com/abereghici/react-app` is the remote repository URL of the
+  project we want to import.
+- `master` is the branch from where the project will be imported.
+
+Now if you run `git log` you'll see the history of `react-app` project inside of
+our monorepo.
+
+Open `apps/react-app/package.json` and change the name of the project with
+`@monorepo/react-app`.
+
+The last step is to register `@monorepo/react-app` project in rush configuration
+file. Open `rush.json` file and add an entry like this under the projects
+inventory:
+
+```json
+ "projects": [
+    {
+      "packageName": "@monorepo/react-app",
+      "projectFolder": "apps/react-app",
+      "reviewCategory": "production"
+    }
+  ]
+```
+
+This tells to Rush that it should manage this project. Next, run `rush update`
+to install the dependencies of `react-app` project. This command can be launched
+in any subfolder of the repo folder that contains `rush.json` file.
+
+```bash
+rush update
+git add .
+git commit -m "Imported react-app project"
+git push origin master
+```
+
+##### Adding Prettier
+
+We want to have consistent syntax and formatting across all code files in our
+monorepo. So we'll apply Prettier globally for the entire repository. We'll run
+it during `git commit`.
+
+Let's create a configuration file in the root of the repo. Prettier allows many
+different names for this config file, but we'll use `.prettierrc.js`
+
+**`<repo root>/.prettierrc.js`**
+
+```js
+module.exports = {
+  arrowParens: 'avoid',
+  bracketSpacing: true,
+  htmlWhitespaceSensitivity: 'css',
+  insertPragma: false,
+  jsxBracketSameLine: false,
+  jsxSingleQuote: false,
+  printWidth: 80,
+  proseWrap: 'preserve',
+  quoteProps: 'as-needed',
+  requirePragma: false,
+  semi: true,
+  singleQuote: true,
+  tabWidth: 2,
+  trailingComma: 'es5',
+  useTabs: false,
+}
+```
+
+You also need to make a `.prettierignore` file to tell Prettier which files to
+skip. It is recommended for `.prettierignore` to extend the same patterns used
+in `.gitignore`.
+
+```bash
+cp .gitignore .prettierignore
+```
+
+Once the configuration is set up, next we need to invoke Prettier manually to
+reformat all the existing source files.
+
+```bash
+# See what files Prettier will format
+# check the output and modify .prettierignore rules if needed
+npx prettier . --list-different
+
+# When you are ready, this will format all the source files
+npx prettier . --write
+```
+
+To speed up the prettier process on `git commit` hook, we'll use
+`prettier-quick` to calculate the subset of files that are staged for commit and
+format them.
+
+Let's create a rush auto-installer, where we'll list all dependencies for
+formatting.
+
+```bash
+# This creates the common/autoinstallers/rush-prettier/package.json file:
+rush init-autoinstaller --name rush-prettier
+```
+
+Install the dependencies:
+
+```bash
+
+cd common/autoinstallers/rush-prettier
+
+# Install the dependencies.
+# You can also manually edit the "dependencies" in the package.json file
+ pnpm install prettier
+ pnpm install pretty-quick
+
+# update the auto-installer
+rush update-autoinstaller --name rush-prettier
+
+```
+
+Next, we will create a rush prettier custom command that invokes the
+`pretty-quick` tool. Add this to the "commands" section of
+`config/rush/command-line.json` file:
+
+```json
+
+  . . .
+  "commands": [
+    {
+      "name": "prettier",
+      "commandKind": "global",
+      "summary": "Used by the pre-commit Git hook. This command invokes Prettier to reformat staged changes.",
+      "safeForSimultaneousRushProcesses": true,
+
+      "autoinstallerName": "rush-prettier",
+
+      // This will invoke common/autoinstallers/rush-prettier/node_modules/.bin/pretty-quick
+      "shellCommand": "pretty-quick --staged"
+    }
+    . . .
+
+```
+
+After saving these changes, let’s test our custom command by running
+`rush prettier`.
+
+The last step is to add a Git hook that invokes rush prettier automatically
+whenever `git commit` is performed. Let's create a file called `pre-commit` in
+the `common/git-hooks` folder:
+
+**`common/git-hooks/pre-commit`**
+
+```bash
+#!/bin/sh
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+
+# Invoke the "rush prettier" custom command to reformat files whenever they
+# are committed. The command is defined in common/config/rush/command-line.json
+# and uses the "rush-prettier" autoinstaller.
+node common/scripts/install-run-rush.js prettier || exit $?
+```
+
+Install the hook by running `rush install`.
+
+We're done! Now on every commit we'll be automatically prettified.
+
+Let's go to the
+[next part](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--webpack+jest)
+where we'll learn how to create build tools with Webpack and jest.
+
+See you there!

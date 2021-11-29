@@ -1,0 +1,208 @@
+---
+title: How to test your GitHub Pull Requests with CodeSandbox CI
+description: |
+  If you're an open source project maintainer or you plan to create one,
+  you should consider using CodeSandbox CI in your project configuration.
+  CodeSandbox CI it's an awesome GitHub application that auto-builds your
+  open source project from pull requests. This can save a lot of time and
+  effort to test and approve the changes.
+date: 2021-11-10
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/how-to-test-your-github-pull-requests-with-codesandbox-ci_ntggsx"
+  imgProps={{alt: 'CodeSandbox'}}
+/>
+
+If you're an open source project maintainer or you plan to create one, you
+should consider using CodeSandbox CI in your project configuration. CodeSandbox
+CI it's an awesome GitHub application that auto-builds your open source project
+from pull requests. This can save a lot of time and effort to test and approve
+the changes.
+
+#### How it works?
+
+Whenever someone opens a new pull request, CodeSandbox CI builds a new version
+of your project. Those builds get posted to CodeSandbox registry, so you can
+test it in there or locally, and all without having to publish the build to
+npm⁠.
+
+#### How do I set this up?
+
+Let's create a demo project to see CodeSandbox CI in action. For that, create a
+new project on GitHub and name it, for example, `codesandbox-ci-test`. Clone it
+locally and add a `package.json` file with the following content:
+
+```json
+{
+  "name": "codesandbox-ci-test",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=12"
+  },
+  "scripts": {
+    "build": "kcd-scripts build"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
+  },
+  "devDependencies": {
+    "kcd-scripts": "^11.2.2",
+    "react": "^17.0.2"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.16.0"
+  }
+}
+```
+
+This is a standard package.json file for a JavaScript project. We'll be using
+`kcd-scripts` to build our project, and we'll be using `react` to create a small
+reusable component for this demo. `@babel/runtime` is required by `kcd-scripts`,
+otherwise it won't build the project.
+
+In `src/index.js` create a simple Counter component:
+
+```jsx
+import * as React from 'react'
+
+export default function Counter() {
+  const [count, setCount] = React.useState(0)
+
+  return (
+    <div>
+      <p>You clicked {count} times!!!</p>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
+  )
+}
+```
+
+Install the CodeSandbox Github application from
+[https://github.com/apps/codesandbox](https://github.com/apps/codesandbox) in
+our new repository.
+
+Create a file called `ci.json` in a folder called `.codesandbox` in the root of
+the repository and add:
+
+```json
+{
+  "buildCommand": "build",
+  "node": "12",
+  "sandboxes": ["/cra-template"]
+}
+```
+
+- `buildCommand` indicates which script in `package.json` should run to build
+  the project.
+- `node` is the Node.js version to use for building the PR.
+- `sandboxes` is the list of sandboxes that we want to be generated. The default
+  value is `vanilla`.
+
+We don't want to use a default sandbox, because we'll have to modify manually
+the sandbox code, to import and display the Counter component. Instead, we'll
+create a custom template, named `cra-template`.
+
+Create a new folder named `cra-template`, inside of this folder create a
+`package.json`:
+
+```json
+{
+  "name": "react-starter-example",
+  "version": "1.0.0",
+  "description": "React example starter project",
+  "main": "src/index.js",
+  "dependencies": {
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-scripts": "4.0.0"
+  },
+  "devDependencies": {
+    "@babel/runtime": "7.13.8",
+    "typescript": "4.1.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
+}
+```
+
+Create a `src` folder and a `index.js` file with:
+
+```jsx
+import {StrictMode} from 'react'
+import ReactDOM from 'react-dom'
+import Counter from 'codesandbox-ci-test'
+
+const rootElement = document.getElementById('root')
+ReactDOM.render(
+  <StrictMode>
+    <Counter />
+  </StrictMode>,
+  rootElement,
+)
+```
+
+Create a `public` folder with a `index.html` file with:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
+    <title>React App</title>
+  </head>
+  <body>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+At this point we can create a new pull request and see our configuration in
+action. The CodeSandbox CI app will build the project and will leave a comment
+on the pull request.
+
+<Image
+  cloudinaryId="bereghici-dev/blog/codesandbox-comment-pr_x6xnta"
+  imgProps={{alt: 'CodeSandbox comment on pull request'}}
+/>
+
+You can checkout the following links to see the result:
+
+CodeSandbox CI dashboard for PRs:
+[https://ci.codesandbox.io/status/abereghici/codesandbox-ci-test/pr/1/builds/186555](https://ci.codesandbox.io/status/abereghici/codesandbox-ci-test/pr/1/builds/186555)
+
+CodeSandbox app:
+[https://codesandbox.io/s/react-zmd24](https://codesandbox.io/s/react-zmd24)
+
+#### Useful Links & Documentation
+
+If you encountered any issues along the way, please check the Github repository:
+[https://github.com/abereghici/codesandbox-ci-test](https://github.com/abereghici/codesandbox-ci-test)
+with the code from this article.
+
+If you're interested in using CodeSandbox CI in a mono-repo project, you can
+check out the Design System project from Twilio
+[https://github.com/twilio-labs/paste](https://github.com/twilio-labs/paste) to
+see their configuration.
+
+For more information about CodeSandbox CI, please check out the
+[documentation](https://codesandbox.io/docs/ci).

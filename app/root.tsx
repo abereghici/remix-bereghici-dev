@@ -20,8 +20,11 @@ import {getThemeSession} from './utils/theme.server'
 import {getDomainUrl} from './utils/misc'
 import {pathedRoutes} from './other-routes.server'
 import Navbar from './components/navbar'
+import Footer from './components/footer'
 
 import tailwindStyles from './styles/tailwind.css'
+import proseStyles from './styles/prose.css'
+import globalStyles from './styles/global.css'
 
 export let links: LinksFunction = () => {
   return [
@@ -41,6 +44,8 @@ export let links: LinksFunction = () => {
     },
     {rel: 'icon', href: '/favicon.ico'},
     {rel: 'stylesheet', href: tailwindStyles},
+    {rel: 'stylesheet', href: proseStyles},
+    {rel: 'stylesheet', href: globalStyles},
   ]
 }
 
@@ -111,6 +116,7 @@ function App() {
         <main id="main">
           <Outlet />
         </main>
+        <Footer />
         <Scripts />
         {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>

@@ -1,0 +1,243 @@
+---
+title: Angular - tips and tricks
+description: |
+  This article aims to show some tricks that can be used in Angular to make the code cleaner and improve the performance of your application.
+date: 2018-06-27
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/angular-tips-and-tricks_gncoem"
+  imgProps={{alt: 'Angular logo'}}
+/>
+
+Recently, I completed a project in Angular and along the way, there were some
+things I learned that might provide some useful direction for other developers.
+So, if you’re diving into Angular for the first time or just looking for a
+better way to manage your Angular projects, here are some tips and tricks you
+might want to keep in mind along the way.
+
+##### Unsubscribe from RxJS observables
+
+Every time a component or directive is destroyed, the subscription to observable
+remains active. So it is important to unsubscribe from it to release the memory
+in the system, otherwise, you will have a memory leak. There are many approaches
+but I prefer to use **takeUntil** function:
+
+```js
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Observable, Subject, interval } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+
+@Component({
+    selector: "app-test",
+    template: `<div>Test</div>`
+})
+export class TestComponent implements OnDestroy, OnInit {
+    private destroyed$ = new Subject<void>();
+
+    private ticks$ = interval(1000);
+
+    public ngOnInit() {
+        this.ticks$
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(data => console.log(data));
+    }
+
+    public ngOnDestroy() {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
+}
+```
+
+You can read more about takeUntil functions here :
+[http://reactivex.io/documentation/operators/takeuntil.html](http://reactivex.io/documentation/operators/takeuntil.html)
+
+If you like decorators you can take a look at this package that provides a
+declarative way to unsubscribe from observables when the component destroyed :
+[https://github.com/NetanelBasal/ngx-take-until-destroy](https://github.com/NetanelBasal/ngx-take-until-destroy)
+
+PS: You don’t need to worry about unsubscribing if you are using AsyncPipe
+because it unsubscribes automatically. Also, methods than take(n),
+takeWhile(predicate), first() and first(predicate) unsubscribes by their-self.
+
+#### Create sexier imports with typescript aliases
+
+When codebase starts to grow you will see imports such as the following:
+
+```js
+import {MyComponent} from '../../../../../../shared/components/mycomponent'
+```
+
+This is very annoying because you don’t know how many dot-dot-slashes you need
+to write in order to go to the right place. Actually, Typescript compiler allows
+to use
+[path mapping](https://www.typescriptlang.org/docs/handbook/module-resolution.html)
+so we can import our files like this :
+
+```js
+import {MyComponent} from '@shared/components/mycomponent'
+```
+
+All we need to do is to define the `paths` and `baseUrl` properties in the
+compilerOptions section in the `tsconfig.json` file. It’s important to know that
+all `paths` are resolved relative to `baseUrl`.
+
+Example :
+
+```js
+{
+    "compilerOptions": {
+    ...
+    "baseUrl": "./src",
+        "paths": {
+            "@shared/*":["app/modules/shared/*"],
+            "@core/*":["app/modules/core/*"]
+        }
+    ...
+    }
+}
+```
+
+#### Use trackBy in \*ngFor
+
+When we use `*ngFor` directive, DOM changes are tracked by object identity. This
+is fine for most situations, but with the introduction of immutable practices
+and Redux, we have every time new objects. This means that every time `*ngFor`
+will render the list in DOM, but we know that DOM operations are expensive. When
+we use trackBy with `*ngFor`, it starts change propagation tracked by given
+identity and not by object identity.
+
+Example:
+
+```js
+<div *ngFor="let post of posts;trackBy:trackByFn"></div>
+...
+identify(index,item){
+    return item.id;
+}
+```
+
+More information about trackBy you can find here:
+[https://netbasal.com/angular-2-improve-performance-with-trackby-cc147b5104e5](https://netbasal.com/angular-2-improve-performance-with-trackby-cc147b5104e5)
+
+#### Use interfaces instead classes
+
+Sometimes we need some models or definitions for the server data. The interfaces
+can be used for this purpose without additional overhead for the final output.
+Unlike classes, interfaces are completely removed during build creation and so
+they will not add any unnecessary code to our final bundle.
+
+#### Clear all your console.logs in production
+
+During the development we write a lot of console.logs in order to debug our app
+and sometimes we display some informations that we don’t want our users to see
+it. We can remove it very simple using few lines of code for production build.
+
+Add this in `main.js`:
+
+```js
+import {environment} from './environments/environment'
+
+if (environment.production) {
+  // Remove console logs in production
+  window.console.log = () => {}
+  enableProdMode()
+}
+```
+
+#### Inspect your bundle with webpack-bundle-analyzer
+
+Analyzing bundle it’s a good start to improve app performance. Visualizing
+webpack output helps you to understand the composition of your bundle, to see
+what modules take space in it and to identify unnecessary dependencies.
+
+More information about this tool you can read here:
+[https://alligator.io/angular/bundle-size/](https://alligator.io/angular/bundle-size/)
+
+#### Don’t Lazy-Load the Default Route
+
+Lazy loading modules it’s a good feature that helps us decrease the startup time
+and load pieces of code on demand. We don’t need to load everything at startup,
+we only needs to load what user expects to see when app loads. A bad practice is
+to lazy-load the default route.
+
+Let’s suppose that we have the following configuration:
+
+```js
+const routes: Routes = [
+  {path: '', redirectTo: '/mymodule', pathMatch: 'full'},
+  {path: 'mymodule', loadChildren: './mymodule.module#MyModule'},
+]
+```
+
+When the user opens the application, he will be redirected to `/mymodule` route
+which will trigger the lazy-loading of `MyModule`. This will trigger an extra
+HTTP call to download `mymodule.module` and will perform some unnecessary
+operations ( parsing and evaluation of JavaScript VM). In result, this slows
+down the initial page rendering. So it’s a good practice to declare the default
+page route as non-lazy.
+
+#### Catch all errors with a custom error handler
+
+Angular provides a built-in global exception handling service so when an error
+occurs, this service will catch it and will print the error details in the
+console. We can extend this exception handler to add some additional
+functionalities like to send the errors to your backend server for analytics or
+other reasons.
+
+###### Extending Angular’s Error Handler
+
+Extending Angular’s Error Handler it’s a easy task. All we need to do is to
+create a class that extends Angular’s `ErrorHandler` and override the
+`handleError` method.
+
+Example:
+
+```js
+import {ErrorHandler} from '@angular/core';
+
+export class AppErrorHandler extends ErrorHandler {
+    constructor(){
+        super(false);
+    }
+
+    public handleError(error: any): void {
+        // Add your logic here.
+        super.handleError(error);
+    }
+}
+```
+
+After that, we should register our custom `AppErrorHandler` in ` app.module.ts`:
+
+```js
+@NgModule({
+    declarations: [ AppComponent ],
+    imports: [ BrowserModule ],
+    bootstrap: [ AppComponent ],
+    providers: [
+        {provide: ErrorHandler, useClass: AppErrorHandler}
+    ]
+})
+```
+
+More information you can find here:
+[https://www.loggly.com/blog/angular-exception-logging-made-simple/](https://www.loggly.com/blog/angular-exception-logging-made-simple/)
+
+**Bonus:**
+
+Wrap your console.log arguments in an object literal to print the variable name
+along with its value.
+
+```js
+console.log(isLoggedIn)
+console.log({isLoggedIn})
+```
+
+Thanks for reading this article, I hope that you enjoyed it!

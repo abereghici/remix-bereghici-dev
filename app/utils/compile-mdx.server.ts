@@ -12,8 +12,34 @@ async function compileMdx<FrontmatterType extends Record<string, unknown>>(
 
     const filContent = fs.readFileSync(path, 'utf8')
 
+    const {default: remarkGfm} = await import('remark-gfm')
+    const {default: rehypeSlug} = await import('rehype-slug')
+    const {default: rehypeCodeTitles} = await import('rehype-code-titles')
+    const {default: rehypeAutolinkHeadings} = await import(
+      'rehype-autolink-headings'
+    )
+    const {default: rehypePrism} = await import('rehype-prism-plus')
+
     const {frontmatter, code} = await bundleMDX({
       source: filContent,
+      xdmOptions(options) {
+        options.remarkPlugins = [...(options.remarkPlugins ?? []), remarkGfm]
+        options.rehypePlugins = [
+          ...(options.rehypePlugins ?? []),
+          rehypeSlug,
+          rehypeCodeTitles,
+          rehypePrism,
+          [
+            rehypeAutolinkHeadings,
+            {
+              properties: {
+                className: ['anchor'],
+              },
+            },
+          ],
+        ]
+        return options
+      },
     })
 
     const readingTime = calculateReadingTime(filContent)

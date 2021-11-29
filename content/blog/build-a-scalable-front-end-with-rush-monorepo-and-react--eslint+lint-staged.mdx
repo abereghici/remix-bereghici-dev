@@ -1,0 +1,535 @@
+---
+title: |
+  Build a scalable front-end with Rush monorepo and React — ESLint + Lint Staged
+description: |
+  This is the 3rd part of the blog series "Build a scalable front-end with Rush monorepo and React".
+  In this post we'll add a shared ESLint configuration and we'll use it together with lint-staged.
+date: 2021-08-18
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/build-a-scalable-front-end-with-rush-monorepo-and-react-part3_zblu0y"
+  imgProps={{alt: 'Rushjs logo'}}
+/>
+
+This is the 3rd part of the blog series "Build a scalable front-end with Rush
+monorepo and React"
+
+- [Part 1](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--repo-setup+import-projects+prettier):
+  Monorepo setup, import projects with preserving git history, add Prettier
+
+- [Part 2](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--webpack+jest):
+  Create build tools package with Webpack and Jest
+
+- [Part 3](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--eslint+lint-staged):
+  Add shared ESLint configuration and use it with lint-staged
+
+- [Part 4](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--github-actions+netlify):
+  Setup a deployment workflow with Github Actions and Netlify.
+
+- [Part 5](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--vscode):
+  Add VSCode configurations for a better development experience.
+
+---
+
+#### TL;DR
+
+If you're interested in just see the code, you can find it here:
+[https://github.com/abereghici/rush-monorepo-boilerplate](https://github.com/abereghici/rush-monorepo-boilerplate)
+
+If you want to see an example with Rush used in a real, large project, you can
+look at [ITwin.js](https://github.com/imodeljs/imodeljs), an open-source project
+developed by Bentley Systems.
+
+---
+
+ESLint is a dominant tool for linting TypeScript and JavaScript code. We'll use
+it together with Lint Staged to achieve the goal "_Enforced rules for code
+quality_" we defined in
+[Part 1](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--repo-setup+import-projects+prettier).
+
+ESLint works with a set of rules you define. If you already have a configuration
+for ESLint that you like, you can add it in our next setup. We'll be using
+AirBnB’s ESLint config, which is the most common rules list for JavaScript
+projects. As of mid-2021, it gets over 2.7 million downloads per week from NPM.
+
+#### Build eslint-config package
+
+Let's start by creating a folder named `eslint-config` in `packages` and
+creating `package.json` file.
+
+```shell
+mkdir packages/eslint-config
+
+touch packages/eslint-config/package.json
+```
+
+Paste the following content to `packages/eslint-config/package.json`:
+
+```json
+{
+  "name": "@monorepo/eslint-config",
+  "version": "1.0.0",
+  "description": "Shared eslint rules",
+  "main": "index.js",
+  "scripts": {
+    "build": ""
+  },
+  "dependencies": {
+    "@babel/eslint-parser": "~7.14.4",
+    "@babel/eslint-plugin": "~7.13.16",
+    "@babel/preset-react": "~7.13.13",
+    "@typescript-eslint/eslint-plugin": "^4.26.1",
+    "@typescript-eslint/parser": "^4.26.1",
+    "babel-eslint": "~10.1.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-config-react-app": "~6.0.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-flowtype": "^5.2.1",
+    "eslint-plugin-jest": "^24.1.5",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.24.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-testing-library": "^3.9.2"
+  },
+  "devDependencies": {
+    "read-pkg-up": "7.0.1",
+    "semver": "~7.3.5"
+  },
+  "peerDependencies": {
+    "eslint": "^7.28.0",
+    "typescript": "^4.3.5"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  }
+}
+```
+
+Here we added all dependencies we need for our ESLint config.
+
+Now, let's create a `config.js` file where we'll define ESLint configurations,
+non-related to rules.
+
+```js
+const fs = require('fs')
+const path = require('path')
+
+const tsConfig = fs.existsSync('tsconfig.json')
+  ? path.resolve('tsconfig.json')
+  : undefined
+
+module.exports = {
+  parser: '@babel/eslint-parser',
+  parserOptions: {
+    babelOptions: {
+      presets: ['@babel/preset-react'],
+    },
+    requireConfigFile: false,
+    ecmaVersion: 2021,
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
+  env: {
+    es6: true,
+    jest: true,
+    browser: true,
+  },
+  globals: {
+    globals: true,
+    shallow: true,
+    render: true,
+    mount: true,
+  },
+  overrides: [
+    {
+      files: ['**/*.ts?(x)'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 2021,
+        sourceType: 'module',
+        project: tsConfig,
+        ecmaFeatures: {
+          jsx: true,
+        },
+        warnOnUnsupportedTypeScriptVersion: true,
+      },
+    },
+  ],
+}
+```
+
+We'll split ESLint rules in multiple files. In `base.js` file we'll define the
+main rules that can be applied to all packages. In `react.js` will be the
+React-specific rules. We might have packages that doesn't use React, so we'll
+use only the `base` rules.
+
+Create a `base.js` file and add:
+
+```js
+module.exports = {
+  extends: ['airbnb', 'prettier'],
+  plugins: ['prettier'],
+  rules: {
+    camelcase: 'error',
+    semi: ['error', 'always'],
+    quotes: [
+      'error',
+      'single',
+      {
+        allowTemplateLiterals: true,
+        avoidEscape: true,
+      },
+    ],
+  },
+  overrides: [
+    {
+      files: ['**/*.ts?(x)'],
+      extends: [
+        'prettier/@typescript-eslint',
+        'plugin:@typescript-eslint/recommended',
+      ],
+      rules: {},
+    },
+  ],
+}
+```
+
+Here we're extending `airbnb` and `prettier` configurations. Here you can
+include other base rules you would like to use.
+
+In `react.js` add the following:
+
+```js
+const readPkgUp = require('read-pkg-up')
+const semver = require('semver')
+
+let oldestSupportedReactVersion = '17.0.1'
+
+// Get react version from package.json and used it in lint configuration
+try {
+  const pkg = readPkgUp.sync({normalize: true})
+  const allDeps = Object.assign(
+    {react: '17.0.1'},
+    pkg.peerDependencies,
+    pkg.devDependencies,
+    pkg.dependencies,
+  )
+
+  oldestSupportedReactVersion = semver
+    .validRange(allDeps.react)
+    .replace(/[>=<|]/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .sort(semver.compare)[0]
+} catch (error) {
+  // ignore error
+}
+
+module.exports = {
+  extends: [
+    'react-app',
+    'react-app/jest',
+    'prettier/react',
+    'plugin:testing-library/recommended',
+    'plugin:testing-library/react',
+  ],
+  plugins: ['react', 'react-hooks', 'testing-library', 'prettier'],
+  settings: {
+    react: {
+      version: oldestSupportedReactVersion,
+    },
+  },
+  rules: {
+    'react/jsx-fragments': ['error', 'element'],
+    'react-hooks/rules-of-hooks': 'error',
+  },
+  overrides: [
+    {
+      files: ['**/*.ts?(x)'],
+      rules: {
+        'react/jsx-filename-extension': [
+          1,
+          {
+            extensions: ['.js', '.jsx', '.ts', '.tsx'],
+          },
+        ],
+      },
+    },
+  ],
+}
+```
+
+We have to provide a `react` version to `react-app` configuration. Instead of
+hardcoding it we'll use `read-pkg-up` to get the version from `package.json`.
+`semver` is used to help us picking the right version.
+
+Last step is to define the entry-point of our configurations. Create a
+`index.js` file and add:
+
+```js
+module.exports = {
+  extends: ['./config.js', './base.js'],
+}
+```
+
+#### Add lint command to react-scripts
+
+ESLint can be used in a variety of ways. You can install it on every package or
+create a `lint` script that runs ESLint bin for you. I'm feeling more
+comfortable with the second approach. We can control the ESLint version in one
+place which makes the upgrade process easier.
+
+We'll need few util functions for `lint` script, so create an `index.js` file
+inside of `packages/react-scripts/scripts/utils` and add the following:
+
+```js
+const fs = require('fs')
+const path = require('path')
+const which = require('which')
+const readPkgUp = require('read-pkg-up')
+
+const {path: pkgPath} = readPkgUp.sync({
+  cwd: fs.realpathSync(process.cwd()),
+})
+
+const appDirectory = path.dirname(pkgPath)
+
+const fromRoot = (...p) => path.join(appDirectory, ...p)
+
+function resolveBin(modName, {executable = modName, cwd = process.cwd()} = {}) {
+  let pathFromWhich
+  try {
+    pathFromWhich = fs.realpathSync(which.sync(executable))
+    if (pathFromWhich && pathFromWhich.includes('.CMD')) return pathFromWhich
+  } catch (_error) {
+    // ignore _error
+  }
+  try {
+    const modPkgPath = require.resolve(`${modName}/package.json`)
+    const modPkgDir = path.dirname(modPkgPath)
+    const {bin} = require(modPkgPath)
+    const binPath = typeof bin === 'string' ? bin : bin[executable]
+    const fullPathToBin = path.join(modPkgDir, binPath)
+    if (fullPathToBin === pathFromWhich) {
+      return executable
+    }
+    return fullPathToBin.replace(cwd, '.')
+  } catch (error) {
+    if (pathFromWhich) {
+      return executable
+    }
+    throw error
+  }
+}
+
+module.exports = {
+  resolveBin,
+  fromRoot,
+  appDirectory,
+}
+```
+
+The most important function here is `resolveBin` that will try to resolve the
+binary for a given module.
+
+Create `lint.js` file inside of `packages/react-scripts/scripts` and add the
+following:
+
+```js
+const spawn = require('react-dev-utils/crossSpawn')
+const yargsParser = require('yargs-parser')
+const {resolveBin, fromRoot, appDirectory} = require('./utils')
+
+let args = process.argv.slice(2)
+const parsedArgs = yargsParser(args)
+
+const cache = args.includes('--no-cache')
+  ? []
+  : [
+      '--cache',
+      '--cache-location',
+      fromRoot('node_modules/.cache/.eslintcache'),
+    ]
+
+const files = parsedArgs._
+
+const relativeEslintNodeModules = 'node_modules/@monorepo/eslint-config'
+const pluginsDirectory = `${appDirectory}/${relativeEslintNodeModules}`
+
+const resolvePluginsRelativeTo = [
+  '--resolve-plugins-relative-to',
+  pluginsDirectory,
+]
+
+const result = spawn.sync(
+  resolveBin('eslint'),
+  [
+    ...cache,
+    ...files,
+    ...resolvePluginsRelativeTo,
+    '--no-error-on-unmatched-pattern',
+  ],
+  {stdio: 'inherit'},
+)
+
+process.exit(result.status)
+```
+
+In `packages/react-scripts/bin/react-scripts.js` register the `lint` command:
+
+```js
+ . . .
+ const scriptIndex = args.findIndex(
+  x => x === 'build' || x === 'start' || x === 'lint' || x === 'test'
+);
+. . .
+
+. . .
+if (['build', 'start', 'lint', 'test'].includes(script)) {
+. . .
+```
+
+Now, add our new dependencies in `packages/react-scripts/package.json`:
+
+```json
+. . .
+    "which": "~2.0.2",
+    "read-pkg-up": "7.0.1",
+    "yargs-parser": "~20.2.7",
+    "eslint": "^7.28.0"
+. . .
+```
+
+#### Lint script in action
+
+Our `lint` script is ready, now let's run it in `react-app` project.
+
+Create a new file named `.eslintrc.js` and add the following:
+
+```js
+module.exports = {
+  extends: ['@monorepo/eslint-config', '@monorepo/eslint-config/react'],
+}
+```
+
+Inside `package.json` add `eslint-config` as dependency:
+
+```json
+. . .
+ "@monorepo/eslint-config": "1.0.0"
+ . . .
+```
+
+In `scripts` section add `lint` command:
+
+```json
+...
+"lint": "react-scripts lint src"
+...
+```
+
+Run `rush update` following by `rushx lint`. At this point you should see a
+bunch of ESLint errors. As an exercise, you can try to fix them by enabling /
+disabling some rules in `eslint-config` or modify `react-app` project to make it
+pass the linting.
+
+#### Add lint-staged command to react-scripts
+
+We'll follow the same approach as we did with `lint` script. Create
+`lint-staged.js` file inside of `packages/react-scripts/scripts` and add the
+following:
+
+```js
+const spawn = require('react-dev-utils/crossSpawn')
+const {resolveBin} = require('./utils')
+
+const args = process.argv.slice(2)
+
+result = spawn.sync(resolveBin('lint-staged'), [...args], {
+  stdio: 'inherit',
+})
+
+process.exit(result.status)
+```
+
+Add `lint-staged` as dependency in `package.json`:
+
+```json
+...
+ "lint-staged": "~11.0.0"
+...
+```
+
+Open `packages/react-scripts/bin/react-scripts.js` and register `lint-staged`
+command.
+
+Next step is to register a `lint-staged` rush command in
+`common/config/command-line.json`, as we did with `prettier` command in
+[Part 1](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--repo-setup+import-projects+prettier).
+
+```json
+{
+  "name": "lint-staged",
+  "commandKind": "bulk",
+  "summary": "Run lint-staged on each package",
+  "description": "Iterates through each package in the monorepo and runs the 'lint-staged' script",
+  "enableParallelism": false,
+  "ignoreMissingScript": true,
+  "ignoreDependencyOrder": true,
+  "allowWarningsInSuccessfulBuild": true
+},
+```
+
+Now, let's run `lint-staged` command on git `pre-commit` hook. Open
+`common/git-hooks/pre-commit` and add the append to the end of the file:
+
+```shell
+node common/scripts/install-run-rush.js lint-staged || exit $?
+```
+
+#### Lint staged in action
+
+Let's define what tasks we want `lint-staged` to run for `react-app` project.
+Open `package.json` of `react-app` and add the configuration for `lint-staged`:
+
+```json
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "react-scripts lint --fix --",
+      "react-scripts test --findRelatedTests --watchAll=false --silent"
+    ],
+  },
+```
+
+Also in `package.json` add the new `lint-staged` script:
+
+```json
+"lint-staged": "react-scripts lint-staged"
+```
+
+Now, on each commit `lint-staged` will lint our files and will run tests for
+related files.
+
+Run `rush install` to register our command, then `rush update` and let's commit
+our changes to see everything in action.
+
+If you encountered any issues during the process, you can see the code related
+to this post
+[here](https://github.com/abereghici/rush-monorepo-boilerplate/tree/049506a98529d4931b2a2ecb629957e0d93e8a8d).
+
+Let's go to the
+[next part](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--github-actions+netlify)
+where we'll see how to use Github Actions with Netlify to automate our
+deployment workflow.

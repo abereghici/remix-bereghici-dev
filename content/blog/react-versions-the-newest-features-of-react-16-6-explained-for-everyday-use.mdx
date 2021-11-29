@@ -1,0 +1,194 @@
+---
+title:
+  React Versions — The Newest Features of React 16.6 Explained for Everyday Use
+description: |
+  We’re living in pretty eventful times for React. Late December 2018 saw the release
+  of version 16.7 which included an important performance bug fix for “React.lazy”.
+  But, no other API (application programming interface) changes were delivered.
+  For that reason, I’m doing a deep dive into React version 16.6, released in October 2018,
+  just a few days before React Day in Berlin.
+date: 2019-07-18
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+
+cloudinaryId="bereghici-dev/blog/react-versions-the-newest-features-of-react_gckt3t"
+imgProps={{alt: 'React Code'}} />
+
+We’re living in pretty eventful times for React. Late December 2018 saw the
+release of version 16.7 which included an important performance bugfix for
+“React.lazy”. But, no other API (application programming interface) changes were
+delivered.
+
+For that reason, I’m doing a deep dive into React version 16.6, released in
+October 2018, just a few days before [React Day](https://reactday.berlin/) in
+Berlin.
+
+As a developer attending a conference, I expect to get practical and technical
+content as well as network with other developers dealing with the same
+challenges as me. Fortunately for me, React Day Berlin jam packed immersive
+learning and networking experience for frontend engineers working with React
+into a one-day event. I managed to make new friends, share knowledge and learn
+new things about React that I could immediately put into practice.
+
+As I stood there, sharing the room with some of the most fascinating developers’
+minds in the world I let myself be inspired and made my decision there. I can
+now (officially) call myself a React aficionado, eager to tinker and test out
+any new features. So, once they were released, I did just that — and I’m going
+to lay it all out for you now. The good and the bad.
+
+React 16.6 version is a minor release with major features focused on performance
+optimization. The main new features are:
+
+- React.memo()
+- React.lazy()
+- static contextType()
+- static getDerivedStateFromError()
+
+#### React.memo()
+
+Function components are convenient when you don’t need to manage state but the
+lack of lifecycle methods especially shouldComponentUpdate, means that your
+component is always going to re-render.
+
+Similar to React.PureComponent, React.memo() is a higher order component that
+allows you to skip re-renders when props doesn’t change:
+
+```jsx
+const MyComponent = React.memo(function (props) {})
+```
+
+#### React.lazy()
+
+As your application grows in functionality, the bundle size also grows in size
+and sometimes, being lazy is a smart choice. React.lazy() feature allows you to
+load your components on demand, aka lazy loading.
+
+```jsx
+import {lazy} from 'react'
+const MyLazyComponent = lazy(() => import('./MyLazyComponent'))
+```
+
+React.lazy() can be combined with Suspense, that will display a fallback
+component while the dynamic component is being loaded.
+
+```jsx
+import {lazy, Suspense} from 'react'
+
+const MyLazyComponent = lazy(() => import('./MyLazyComponent'))
+function Application() {
+  return (
+    <Suspense fallback={<div>Loading…</div>}>
+      <MyLazyComponent />
+    </Suspense>
+  )
+}
+```
+
+#### static contextType()
+
+React Context allows for parent components to pass data to their children, no
+matter how deep the component tree is. Usually, this is the use case for using
+Redux or Flux, but when you don’t need complex data management, React Context is
+a good choice.
+
+Starting with React 16.6 is easier to consume the context value anywhere within
+class components:
+
+```jsx
+class MyComponent extends React.Component {
+  static contextType = MyContext
+  render() {
+    let value = this.context
+    /* render something based on the context value */
+  }
+}
+```
+
+You can reference the context in any of the lifecycle methods including the
+render function. Keep in mind, this method only allows you to consume one
+context.
+
+#### static getDerivedStateFromError()
+
+Error boundaries were introduced in React 16.3 and allow us to catch errors in
+our components and prevent the application from crashing.
+
+React 16.6 introduced a new lifecycle method called getDerivedStateFromError.
+This method is invoked after an error has been thrown by a descendant component.
+It receives the error that was thrown as a parameter and should return a value
+to update the state providing a method to handle the error.
+
+componentDidCatch should be used for side-effects like logging errors.
+
+```jsx
+class ErrorBoundary extends React.Component {
+  state = {hasError: false}
+  static getDerivedStateFromError(error) {
+    // Update state so the next render will show the fallback UI.
+    return {hasError: true}
+  }
+  componentDidCatch(error, info) {
+    logComponentStackToMyService(info.componentStack)
+  }
+  render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return <h1>Something went wrong.</h1>
+    }
+    return this.props.children
+  }
+}
+```
+
+If you’d like an in-depth exploration of these features,
+[check out this video](https://www.youtube.com/watch?time_continue=389&v=p8v9X2TNQKA)
+from React Day Berlin.
+
+#### React Hooks
+
+At React Day Berlin, the coding community celebrated the introduction of an
+awesome feature called Hooks! Although still in its testing phase, we discussed
+this functionality at length.
+
+Currently, there are some problems with the way we write React components. Our
+components are simple and short in the beginning, but finished with huge
+components — complicated logic spread around the constructor, methods and within
+the lifecycle methods. Another problem is the lack of states in functional
+components. If we want to use React features like context, states & lifecycle
+methods we need to convert a functional component into a class component.
+
+Hooks are designed to fix these issues by adding the option to use state,
+context & lifecycle methods in a functional component. This means we’ll no
+longer be forced to create class components and we can avoid the boilerplate
+code we have to write when using classes. Also, React Hooks are a good
+alternative to reuse some logic that comes with a much easier to understand
+syntax and logic flow.
+
+#### So, why do I love React so much?
+
+As a front-end developer, I love trying new things: frameworks, libraries —
+anything to make my job more efficient deserves my attention. I’ve created
+several projects using Angular and was quite happy with it, but Angular is a
+full-blown framework. It takes care of everything — HTTP, code structure,
+application architecture, so we are forced color inside their proverbial coding
+lines.
+
+In contrast, React allows freedom. It comes with a different approach and
+philosophy to creating front-end. I prefer solutions where I can pick and choose
+the libraries that best fit the requirements of my app.
+
+I love React because of its community. There is no shortage on tutorials for how
+to learn using it, write components, how to route, etc.
+
+The React ecosystem is focused on developer experience and productivity. The
+community has created an impressive number of tools that help everyone write
+better code. Redux, React Router & Immutable.js are just a few examples.
+
+My list of reasons behind choosing React for front-end can go on, but these are
+the main behind my choice to use this library.

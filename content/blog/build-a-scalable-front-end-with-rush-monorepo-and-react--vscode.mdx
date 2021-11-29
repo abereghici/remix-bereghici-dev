@@ -1,0 +1,150 @@
+---
+title: |
+  Build a scalable front-end with Rush monorepo and React — VSCode
+description: |
+  This is the 5th part of the blog series "Build a scalable front-end with Rush monorepo and React".
+  In this post we'll add VSCode configurations to have a better development experience with monorepo.
+date: 2021-08-20
+categories:
+  - react
+meta:
+  keywords:
+    - react
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/build-a-scalable-front-end-with-rush-monorepo-and-react-part5_wgbjfi"
+  imgProps={{alt: 'Rushjs logo'}}
+/>
+
+This is the 5th part of the blog series "Build a scalable front-end with Rush
+monorepo and React"
+
+- [Part 1](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--repo-setup+import-projects+prettier):
+  Monorepo setup, import projects with preserving git history, add Prettier
+
+- [Part 2](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--webpack+jest):
+  Create build tools package with Webpack and Jest
+
+- [Part 3](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--eslint+lint-staged):
+  Add shared ESLint configuration and use it with lint-staged
+
+- [Part 4](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--github-actions+netlify):
+  Setup a deployment workflow with Github Actions and Netlify.
+
+- [Part 5](/blog/build-a-scalable-front-end-with-rush-monorepo-and-react--vscode):
+  Add VSCode configurations for a better development experience.
+
+---
+
+#### TL;DR
+
+If you're interested in just see the code, you can find it here:
+[https://github.com/abereghici/rush-monorepo-boilerplate](https://github.com/abereghici/rush-monorepo-boilerplate)
+
+If you want to see an example with Rush used in a real, large project, you can
+look at [ITwin.js](https://github.com/imodeljs/imodeljs), an open-source project
+developed by Bentley Systems.
+
+---
+
+In previous posts, we added `prettier` and `eslint` to format our code and
+enforce a consistent code style across our projects. We can save time by
+automatically formatting pasted code, or fix `lint` errors while writing code,
+without running lint command to see all the errors.
+
+VSCode provides two different types of settings:
+
+- User Settings - applied to all VSCode instances
+- Workspace Settings - applied to the current project only.
+
+We'll use Workspace Settings and few extensions to improve our development
+experience in VSCode.
+
+#### Install extensions
+
+Let's add Prettier Formatter for VSCode. Launch VS Code Quick Open (Ctrl+P),
+paste the following command, and press enter.
+
+```bash
+ext install esbenp.prettier-vscode
+```
+
+or you can open
+[https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+and install it manually.
+
+In the same manner, let's install VSCode ESLint extension:
+
+```bash
+ext install dbaeumer.vscode-eslint
+```
+
+or install manually from
+[https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+
+#### Add settings
+
+Create a new file `.vscode/settings.json` in the root of our monorepo and let's
+add the following settings:
+
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.nyc_output": true,
+    "**/.rush": true
+  },
+  "files.exclude": {
+    "**/.nyc_output": true,
+    "**/.rush": true,
+    "**/*.build.log": true,
+    "**/*.build.error.log": true,
+    "**/generated-docs": true,
+    "**/package-deps.json": true,
+    "**/test-apps/**/build": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "eslint.nodePath": "common/temp/node_modules",
+  "eslint.trace.server": "verbose",
+  "eslint.options": {
+    "resolvePluginsRelativeTo": "node_modules/@monorepo/eslint-config"
+  },
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "editor.codeActionsOnSave": {
+    "editor.action.fixAll": true,
+    "source.fixAll.eslint": true
+  }
+}
+```
+
+In these settings we:
+
+- set Prettier as default formatter
+- exclude from search some irrelevant folders like `node_modules` and
+  `.nyc_output`
+- exclude from VSCode file explorer irrelevant files
+- provide a nodePath for ESLint. We're not using `eslint` directly (we're using
+  `lint` script from `react-scripts`) so we're helping the extension to find the
+  `eslint` binary.
+- provide a path to `eslint` plugins. We're helping ESLint extension to pick up
+  the right rules for each project.
+
+I hope you'll find these settings useful.

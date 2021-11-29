@@ -41,7 +41,7 @@ export default function FullArticle() {
           {` • `}0 views
         </Paragraph>
       </div>
-      <div className="mt-9">
+      <div className="mt-9 prose dark:prose-dark">
         <Component />
       </div>
     </ResponsiveContainer>

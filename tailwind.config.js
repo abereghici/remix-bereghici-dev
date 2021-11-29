@@ -8,12 +8,12 @@ module.exports = {
   variants: {},
   theme: {
     colors: {
-      // color scheme is defined in /app.css
       transparent: 'transparent',
       current: 'currentColor',
       white: '#fff',
       black: '#000',
       gray: {
+        50: '#F9FAFB',
         100: '#fafafa',
         200: '#eaeaea',
         300: ' #999999',
@@ -25,7 +25,7 @@ module.exports = {
         900: '#111111',
       },
       yellow: {
-        500: '#ffd644',
+        500: '#F59E0B',
       },
       blue: {
         100: '#e8f2ff',
@@ -35,17 +35,87 @@ module.exports = {
         500: '#eb5656',
       },
       green: {
-        100: '#e7f9ed',
-        500: '#30c85e',
-        600: '#68d94a',
+        100: '#ECFDF5',
+        500: '#10B981',
+        600: '#059669',
+      },
+      purple: {
+        500: '#8B5CF6',
+      },
+      pink: {
+        500: '#EC4899',
       },
     },
     extend: {
       fontFamily: {
         sans: ['IBM Plex Sans', ...defaultTheme.fontFamily.sans],
       },
+      typography: theme => ({
+        DEFAULT: {
+          css: {
+            color: theme('colors.gray.700'),
+            a: {
+              color: theme('colors.blue.500'),
+              '&:hover': {
+                color: theme('colors.blue.700'),
+              },
+              code: {color: theme('colors.blue.400')},
+            },
+            'h2,h3,h4': {
+              'scroll-margin-top': defaultTheme.spacing[32],
+            },
+            thead: {
+              borderBottomColor: theme('colors.gray.200'),
+            },
+            code: {color: theme('colors.pink.500')},
+            'blockquote p:first-of-type::before': false,
+            'blockquote p:last-of-type::after': false,
+          },
+        },
+        dark: {
+          css: {
+            color: theme('colors.gray.200'),
+            a: {
+              color: theme('colors.blue.400'),
+              '&:hover': {
+                color: theme('colors.blue.600'),
+              },
+              code: {color: theme('colors.blue.400')},
+            },
+            blockquote: {
+              borderLeftColor: theme('colors.gray.700'),
+              color: theme('colors.gray.300'),
+            },
+            'h2,h3,h4': {
+              color: theme('colors.gray.100'),
+              'scroll-margin-top': defaultTheme.spacing[32],
+            },
+            hr: {borderColor: theme('colors.gray.700')},
+            ol: {
+              li: {
+                '&:before': {color: theme('colors.gray.500')},
+              },
+            },
+            ul: {
+              li: {
+                '&:before': {backgroundColor: theme('colors.gray.500')},
+              },
+            },
+            strong: {color: theme('colors.gray.100')},
+            thead: {
+              color: theme('colors.gray.100'),
+              borderBottomColor: theme('colors.gray.600'),
+            },
+            tbody: {
+              tr: {
+                borderBottomColor: theme('colors.gray.700'),
+              },
+            },
+          },
+        },
+      }),
     },
   },
   purge: [fromRoot('./app/**/*.+(js|ts|tsx|mdx|md)')],
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
 }
