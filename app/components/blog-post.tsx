@@ -1,5 +1,6 @@
-import {Link} from 'react-router-dom'
-import {Post} from '~/utils/posts.server'
+import * as React from 'react'
+import {Link} from 'remix'
+import type {Post} from '~/utils/posts.server'
 import {H4, Paragraph} from '~/components/typography'
 
 export default function BlogPost({

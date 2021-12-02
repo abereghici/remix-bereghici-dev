@@ -4,7 +4,7 @@ import {getMdxFile, getMdxFilesFromDir} from './mdx.server'
 interface PostFrontMatter {
   title: string
   description: string
-  date: Date
+  date: Date | string
   categories: Array<string>
   meta: {
     keywords: Array<string>
@@ -14,7 +14,7 @@ interface PostFrontMatter {
 
 export interface Post extends PostFrontMatter {
   slug: string
-  code?: string
+  code: string
   readingTime: string
 }
 

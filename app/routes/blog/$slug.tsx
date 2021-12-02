@@ -1,20 +1,33 @@
-import {useLoaderData} from 'remix'
+import * as React from 'react'
+import {json, useLoaderData} from 'remix'
 import parseISO from 'date-fns/parseISO'
 import format from 'date-fns/format'
 import ResponsiveContainer from '~/components/responsive-container'
 import {H1, Paragraph} from '~/components/typography'
 import {useMdxComponent} from '~/utils/mdx'
-import {getPost} from '~/utils/posts.server'
+import {getPost, Post} from '~/utils/posts.server'
+import type {AppLoader} from '~/types'
 
-export async function loader({params}: {params: {slug: string}}) {
+type LoaderData = {
+  post: Post
+}
+
+export const loader: AppLoader<{slug: string}> = async ({params}) => {
   const {slug} = params
+  const post = await getPost(slug)
 
-  return getPost(slug)
+  const data: LoaderData = {post}
+
+  return json(data, {
+    headers: {
+      'Cache-Control': 'private, max-age=3600',
+      Vary: 'Cookie',
+    },
+  })
 }
 
 export default function FullArticle() {
-  const post = useLoaderData()
-
+  const {post} = useLoaderData<LoaderData>()
   const {title, readingTime, date, code} = post
 
   const Component = useMdxComponent(code)
@@ -33,7 +46,10 @@ export default function FullArticle() {
           />
           <Paragraph className="ml-2 " size="small">
             {'Alexandru Bereghici / '}
-            {format(parseISO(date), 'MMMM dd, yyyy')}
+            {format(
+              date instanceof Date ? date : parseISO(date),
+              'MMMM dd, yyyy',
+            )}
           </Paragraph>
         </div>
         <Paragraph size="small" className="mt-2 t min-w-32 md:mt-0">

@@ -1,7 +1,18 @@
+.DS_Store
 node_modules
 
 /.cache
 /build
+/server-build
 /public/build
-/app/styles/
+/coverage
+tsconfig.tsbuildinfo
+
+/app/styles/**/*.css
+other/postcss.ignored
+
+*.local.*
+
 .env
+.env.production
+.envrc

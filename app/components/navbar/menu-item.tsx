@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import {Link} from 'remix'
-import {useLocation} from 'react-router-dom'
+import {useLocation} from 'remix'
 
 export default function MenuItem({
   to,

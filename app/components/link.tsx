@@ -1,3 +1,4 @@
+import * as React from 'react'
 import clsx from 'clsx'
 import {Link as RemixLink, LinkProps} from 'remix'
 

@@ -1,14 +1,34 @@
+import * as React from 'react'
+import {json, LoaderFunction, useLoaderData} from 'remix'
 import ResponsiveContainer from '~/components/responsive-container'
 import Hero from '~/components/hero'
 import BlogPostCard from '~/components/blog-post-card'
 import {H2} from '~/components/typography'
 import Link from '~/components/link'
 import {getAllPosts, Post} from '~/utils/posts.server'
-import {useLoaderData} from 'remix'
 
-export async function loader() {
+type LoaderData = {
+  posts: Post[]
+}
+
+export const loader: LoaderFunction = async () => {
   const posts = await getAllPosts()
-  return posts.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 3)
+  const latestPosts = posts
+    .sort((a, b) => {
+      const aDate = a.date instanceof Date ? a.date : new Date(a.date)
+      const bDate = b.date instanceof Date ? b.date : new Date(b.date)
+      return bDate.getTime() - aDate.getTime()
+    })
+    .slice(0, 3)
+
+  const data: LoaderData = {posts: latestPosts}
+
+  return json(data, {
+    headers: {
+      'Cache-Control': 'private, max-age=3600',
+      Vary: 'Cookie',
+    },
+  })
 }
 
 const gradients = [
@@ -16,8 +36,9 @@ const gradients = [
   'from-[#6EE7B7] via-[#3B82F6] to-[#9333EA]',
   'from-[#FDE68A] via-[#FCA5A5] to-[#FECACA]',
 ]
+
 export default function IndexRoute() {
-  let posts = useLoaderData()
+  let {posts} = useLoaderData<LoaderData>()
 
   return (
     <ResponsiveContainer>
@@ -31,7 +52,7 @@ export default function IndexRoute() {
             description={post.description}
             slug={post.slug}
             views={0}
-            gradient={gradients[index]}
+            gradient={gradients[index]!}
           />
         ))}
       </div>

@@ -1,3 +1,4 @@
+import * as React from 'react'
 import ResponsiveContainer from './responsive-container'
 import Link from './link'
 

@@ -8,6 +8,7 @@ import {
   json,
   useLoaderData,
   MetaFunction,
+  ScrollRestoration,
 } from 'remix'
 import type {LinksFunction} from 'remix'
 import {
@@ -117,6 +118,7 @@ function App() {
           <Outlet />
         </main>
         <Footer />
+        <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>

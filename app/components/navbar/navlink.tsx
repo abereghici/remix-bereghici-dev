@@ -1,5 +1,6 @@
+import * as React from 'react'
 import {Link} from 'remix'
-import {useLocation} from 'react-router-dom'
+import {useLocation} from 'remix'
 import clsx from 'clsx'
 
 export default function NavLink({

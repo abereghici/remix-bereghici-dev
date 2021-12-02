@@ -1,3 +1,4 @@
+import * as React from 'react'
 import {H1, Paragraph} from '~/components/typography'
 
 export default function Hero() {
