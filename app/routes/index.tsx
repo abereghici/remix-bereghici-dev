@@ -6,6 +6,7 @@ import BlogPostCard from '~/components/blog-post-card'
 import {H2} from '~/components/typography'
 import Link from '~/components/link'
 import {getAllPosts, Post} from '~/utils/posts.server'
+import {ServerError} from '~/components/errors'
 
 type LoaderData = {
   posts: Post[]
@@ -78,4 +79,9 @@ export default function IndexRoute() {
       </Link>
     </ResponsiveContainer>
   )
+}
+
+export function ErrorBoundary({error}: {error: Error}) {
+  console.error(error)
+  return <ServerError error={error} />
 }

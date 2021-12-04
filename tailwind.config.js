@@ -50,6 +50,12 @@ module.exports = {
       fontFamily: {
         sans: ['IBM Plex Sans', ...defaultTheme.fontFamily.sans],
       },
+      maxHeight: {
+        '75vh': '75vh',
+      },
+      spacing: {
+        '5vw': '5vw',
+      },
       typography: theme => ({
         DEFAULT: {
           css: {

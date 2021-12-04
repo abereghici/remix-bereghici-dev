@@ -1,3 +1,4 @@
+import * as React from 'react'
 import {
   Links,
   Meta,
@@ -9,6 +10,7 @@ import {
   useLoaderData,
   MetaFunction,
   ScrollRestoration,
+  useCatch,
 } from 'remix'
 import type {LinksFunction} from 'remix'
 import {
@@ -26,6 +28,9 @@ import Footer from './components/footer'
 import tailwindStyles from './styles/tailwind.css'
 import proseStyles from './styles/prose.css'
 import globalStyles from './styles/global.css'
+import {H1, Paragraph} from './components/typography'
+import ResponsiveContainer from './components/responsive-container'
+import {FourOhFour, ServerError} from './components/errors'
 
 export let links: LinksFunction = () => {
   return [
@@ -134,4 +139,45 @@ export default function AppWithProviders() {
       <App />
     </ThemeProvider>
   )
+}
+
+// best effort, last ditch error boundary. This should only catch root errors
+// all other errors should be caught by the index route which will include
+// the footer and stuff, which is much better.
+export function ErrorBoundary({error}: {error: Error}) {
+  console.error(error)
+  return (
+    <html lang="en">
+      <head>
+        <title>Oh no...</title>
+        <Meta />
+        <Links />
+      </head>
+      <body className="bg-primary">
+        <ServerError error={error} />
+      </body>
+      <Scripts />
+    </html>
+  )
+}
+
+export function CatchBoundary() {
+  const caught = useCatch()
+  console.error('CatchBoundary', caught)
+  if (caught.status === 404) {
+    return (
+      <html lang="en">
+        <head>
+          <title>Oh no...</title>
+          <Meta />
+          <Links />
+        </head>
+        <body className="bg-primary">
+          <FourOhFour />
+        </body>
+        <Scripts />
+      </html>
+    )
+  }
+  throw new Error(`Unhandled error: ${caught.status}`)
 }
