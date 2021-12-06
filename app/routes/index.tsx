@@ -24,12 +24,7 @@ export const loader: LoaderFunction = async () => {
 
   const data: LoaderData = {posts: latestPosts}
 
-  return json(data, {
-    headers: {
-      'Cache-Control': 'private, max-age=3600',
-      Vary: 'Cookie',
-    },
-  })
+  return json(data)
 }
 
 const gradients = [
@@ -49,10 +44,7 @@ export default function IndexRoute() {
         {posts.map((post: Post, index: number) => (
           <BlogPostCard
             key={post.slug}
-            title={post.title}
-            description={post.description}
-            slug={post.slug}
-            views={0}
+            post={post}
             gradient={gradients[index]!}
           />
         ))}

@@ -2,20 +2,16 @@ import * as React from 'react'
 import clsx from 'clsx'
 import {Link} from 'remix'
 import {H6, Paragraph} from './typography'
+import type {Post} from '~/utils/posts.server'
 
 export default function BlogPostCard({
-  title,
-  description,
-  slug,
   gradient,
-  views,
+  post,
 }: {
-  title: string
-  description: string
-  slug: string
+  post: Post
   gradient: string
-  views: number
 }) {
+  const {title, description, slug, views} = post
   return (
     <Link
       prefetch="intent"
@@ -53,7 +49,7 @@ export default function BlogPostCard({
             />
           </svg>
           <span className="ml-2 align-baseline capsize">
-            {views ? new Number(views).toLocaleString() : '–'}
+            {views.count ? new Number(views.count).toLocaleString() : '–'}
           </span>
         </div>
       </div>

@@ -37,7 +37,7 @@
 }
 
 .prose pre code {
-  @apply text-gray-800 dark:text-gray-200;
+  @apply text-gray-800 dark:text-gray-200 whitespace-pre-wrap;
 }
 
 .prose > :first-child {

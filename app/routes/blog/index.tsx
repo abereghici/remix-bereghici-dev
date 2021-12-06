@@ -3,10 +3,12 @@ import {json, LoaderFunction, useLoaderData} from 'remix'
 import {getAllPosts, Post} from '~/utils/posts.server'
 import ResponsiveContainer from '~/components/responsive-container'
 import BlogPost from '~/components/blog-post'
-import {H1} from '~/components/typography'
+import {H1, Paragraph} from '~/components/typography'
+import {getAllPostViewsCount} from '~/utils/prisma.server'
 
 type LoaderData = {
   posts: Post[]
+  totalViewsCount: number
 }
 
 export const loader: LoaderFunction = async () => {
@@ -17,30 +19,26 @@ export const loader: LoaderFunction = async () => {
     return bDate.getTime() - aDate.getTime()
   })
 
-  const data: LoaderData = {posts: sortedPosts}
+  const totalViewsCount = await getAllPostViewsCount()
 
-  return json(data, {
-    headers: {
-      'Cache-Control': 'private, max-age=3600',
-      Vary: 'Cookie',
-    },
-  })
+  const data: LoaderData = {posts: sortedPosts, totalViewsCount}
+
+  return json(data)
 }
 
 export default function Index() {
-  let {posts} = useLoaderData<LoaderData>()
+  let {posts, totalViewsCount} = useLoaderData<LoaderData>()
 
   return (
     <ResponsiveContainer>
-      <H1 className="mb-10 w-full tracking-tight">All posts</H1>
+      <H1 className="mb-2 w-full tracking-tight">All posts</H1>
+      <Paragraph className="mb-10 block" as="em">
+        Total views: {totalViewsCount}
+      </Paragraph>
       <ul>
         {posts.map((post: Post) => (
           <li key={post.slug}>
-            <BlogPost
-              slug={post.slug}
-              title={post.title}
-              description={post.description}
-            />
+            <BlogPost post={post} />
           </li>
         ))}
       </ul>

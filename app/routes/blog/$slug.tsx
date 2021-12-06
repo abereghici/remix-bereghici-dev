@@ -7,6 +7,7 @@ import {H1, Paragraph} from '~/components/typography'
 import {useMdxComponent} from '~/utils/mdx'
 import {getPost, Post} from '~/utils/posts.server'
 import type {AppLoader} from '~/types'
+import {addPostRead} from '~/utils/prisma.server'
 
 type LoaderData = {
   post: Post
@@ -15,20 +16,18 @@ type LoaderData = {
 export const loader: AppLoader<{slug: string}> = async ({params}) => {
   const {slug} = params
   const post = await getPost(slug)
+  const viewId = Number(post.views.id)
+
+  await addPostRead(isNaN(viewId) ? 0 : viewId, slug)
 
   const data: LoaderData = {post}
 
-  return json(data, {
-    headers: {
-      'Cache-Control': 'private, max-age=3600',
-      Vary: 'Cookie',
-    },
-  })
+  return json(data)
 }
 
 export default function FullArticle() {
   const {post} = useLoaderData<LoaderData>()
-  const {title, readingTime, date, code} = post
+  const {title, readingTime, date, code, views} = post
 
   const Component = useMdxComponent(code)
 
@@ -53,8 +52,9 @@ export default function FullArticle() {
           </Paragraph>
         </div>
         <Paragraph size="small" className="mt-2 t min-w-32 md:mt-0">
-          {readingTime}
-          {` • `}0 views
+          {readingTime.text}
+          {` • `}
+          {views.count} views
         </Paragraph>
       </div>
       <div className="mt-9 prose dark:prose-dark">

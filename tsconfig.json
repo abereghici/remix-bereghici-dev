@@ -6,6 +6,7 @@
     {"path": "types"},
     {"path": "app"},
     {"path": "server"},
+    {"path": "prisma"},
     {"path": "content"}
   ]
 }
