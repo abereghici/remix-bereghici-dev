@@ -1,13 +1,13 @@
 import * as React from 'react'
-import {json, useLoaderData} from 'remix'
+import {json, useCatch, useLoaderData} from 'remix'
 import parseISO from 'date-fns/parseISO'
 import format from 'date-fns/format'
+import {useMdxComponent} from '~/utils/mdx'
+import {getPost, addPostRead} from '~/utils/posts.server'
 import ResponsiveContainer from '~/components/responsive-container'
 import {H1, Paragraph} from '~/components/typography'
-import {useMdxComponent} from '~/utils/mdx'
-import {getPost, Post} from '~/utils/posts.server'
-import type {AppLoader} from '~/types'
-import {addPostRead} from '~/utils/prisma.server'
+import {FourOhFour, ServerError} from '~/components/errors'
+import type {AppLoader, Post} from '~/types'
 
 type LoaderData = {
   post: Post
@@ -18,11 +18,12 @@ export const loader: AppLoader<{slug: string}> = async ({params}) => {
   const post = await getPost(slug)
 
   if (!post) {
-    throw json({status: 404})
+    throw json(null, {status: 404})
   }
 
   const viewId = Number(post.views.id)
-  await addPostRead(isNaN(viewId) ? 0 : viewId, slug)
+  void addPostRead(isNaN(viewId) ? 0 : viewId, slug)
+
   const data: LoaderData = {post}
 
   return json(data)
@@ -66,4 +67,18 @@ export default function FullArticle() {
       </div>
     </ResponsiveContainer>
   )
+}
+
+export function CatchBoundary() {
+  const caught = useCatch()
+  console.error('CatchBoundary', caught)
+  if (caught.status === 404) {
+    return <FourOhFour />
+  }
+  throw new Error(`Unhandled error: ${caught.status}`)
+}
+
+export function ErrorBoundary({error}: {error: Error}) {
+  console.error(error)
+  return <ServerError error={error} />
 }

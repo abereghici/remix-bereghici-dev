@@ -17,7 +17,6 @@ const octokit = new Octokit({
       console.warn(
         `Request quota exhausted for request ${options.method} ${options.url}. Retrying after ${retryAfter} seconds.`,
       )
-
       return true
     },
     onAbuseLimit: (retryAfter: number, options: ThrottleOptions) => {

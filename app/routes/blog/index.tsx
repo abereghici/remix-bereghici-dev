@@ -1,10 +1,11 @@
 import * as React from 'react'
 import {json, LoaderFunction, useLoaderData} from 'remix'
-import {getAllPosts, PostItem} from '~/utils/posts.server'
+import {getAllPosts, getAllPostViewsCount} from '~/utils/posts.server'
+import {ServerError} from '~/components/errors'
+import {H1, Paragraph} from '~/components/typography'
 import ResponsiveContainer from '~/components/responsive-container'
 import BlogPost from '~/components/blog-post'
-import {H1, Paragraph} from '~/components/typography'
-import {getAllPostViewsCount} from '~/utils/prisma.server'
+import type {PostItem} from '~/types'
 
 type LoaderData = {
   posts: PostItem[]
@@ -13,11 +14,9 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async () => {
   const posts = await getAllPosts()
-
   const totalViewsCount = await getAllPostViewsCount()
 
   const data: LoaderData = {posts, totalViewsCount}
-
   return json(data)
 }
 
@@ -39,4 +38,9 @@ export default function Index() {
       </ul>
     </ResponsiveContainer>
   )
+}
+
+export function ErrorBoundary({error}: {error: Error}) {
+  console.error(error)
+  return <ServerError error={error} />
 }

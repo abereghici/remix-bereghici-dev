@@ -26,6 +26,7 @@ async function getMdxPage({
   const key = getCompiledKey(contentDir, slug)
 
   const cached = await redisCache.get<MdxPage>(key)
+
   if (cached) {
     return cached
   }
@@ -44,7 +45,9 @@ async function getMdxPage({
     return Promise.reject(err)
   })
 
-  if (!compiledPage) {
+  if (compiledPage) {
+    void redisCache.set(key, compiledPage)
+  } else {
     void redisCache.del(key)
   }
 
@@ -105,8 +108,9 @@ async function downloadMdxFilesCached(
 
   const downloaded = await downloadMdxFileOrDirectory(`${contentDir}/${slug}`)
 
-  // if there aren't any files, remove it from the cache
-  if (!downloaded.files.length) {
+  if (downloaded.files.length) {
+    void redisCache.set(key, downloaded)
+  } else {
     void redisCache.del(key)
   }
 
@@ -114,6 +118,18 @@ async function downloadMdxFilesCached(
 }
 
 async function getMdxDirList(contentDir: string) {
+  const fullContentDirPath = `content/${contentDir}`
+  const dirList = (await downloadDirList(fullContentDirPath))
+    .map(({name, path}) => ({
+      name,
+      slug: path.replace(`${fullContentDirPath}/`, '').replace(/\.mdx$/, ''),
+    }))
+    .filter(({name}) => name !== 'README.md')
+
+  return dirList
+}
+
+async function getMdxPagesInDirectory(contentDir: string) {
   const key = getDirListKey(contentDir)
 
   const cached = await redisCache.get<
@@ -127,18 +143,6 @@ async function getMdxDirList(contentDir: string) {
     return cached
   }
 
-  const fullContentDirPath = `content/${contentDir}`
-  const dirList = (await downloadDirList(fullContentDirPath))
-    .map(({name, path}) => ({
-      name,
-      slug: path.replace(`${fullContentDirPath}/`, '').replace(/\.mdx$/, ''),
-    }))
-    .filter(({name}) => name !== 'README.md')
-
-  return dirList
-}
-
-async function getMdxPagesInDirectory(contentDir: string) {
   const dirList = await getMdxDirList(contentDir)
 
   // our octokit throttle plugin will make sure we don't hit the rate limit
@@ -151,11 +155,15 @@ async function getMdxPagesInDirectory(contentDir: string) {
     }),
   )
 
-  const pages = await Promise.all(
-    pageDatas.map(pageData => compileMdxCached({contentDir, ...pageData})),
-  )
+  const pages = (
+    await Promise.all(
+      pageDatas.map(pageData => compileMdxCached({contentDir, ...pageData})),
+    )
+  ).filter(typedBoolean)
 
-  return pages.filter(typedBoolean)
+  void redisCache.set(key, pages)
+
+  return pages
 }
 
 /**
@@ -213,4 +221,7 @@ export {
   getMdxPagesInDirectory,
   getMdxComponent,
   useMdxComponent,
+  getCompiledKey,
+  getDownloadKey,
+  getDirListKey,
 }

@@ -25,6 +25,19 @@ type MdxPage = {
   }
 }
 
+interface PostViews {
+  id?: string
+  count: number
+}
+
+interface Post extends MdxPage {
+  views: PostViews
+}
+
+interface PostItem extends MdxListItem {
+  views: PostViews
+}
+
 type MdxListItem = Omit<MdxPage, 'code'>
 
 type AppLoader<
@@ -39,4 +52,13 @@ type AppAction<
   args: Omit<Parameters<ActionFunction>['0'], 'params'> & {params: Params},
 ) => ReturnType<ActionFunction>
 
-export {GitHubFile, AppLoader, AppAction, MdxPage, MdxListItem}
+export {
+  GitHubFile,
+  AppLoader,
+  AppAction,
+  MdxPage,
+  MdxListItem,
+  Post,
+  PostItem,
+  PostViews,
+}

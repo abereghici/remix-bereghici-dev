@@ -5,8 +5,9 @@ import Hero from '~/components/hero'
 import BlogPostCard from '~/components/blog-post-card'
 import {H2} from '~/components/typography'
 import Link from '~/components/link'
-import {getAllPosts, PostItem} from '~/utils/posts.server'
+import {getAllPosts} from '~/utils/posts.server'
 import {ServerError} from '~/components/errors'
+import type {PostItem} from '~/types'
 
 type LoaderData = {
   posts: PostItem[]
@@ -16,7 +17,6 @@ export const loader: LoaderFunction = async () => {
   const posts = await getAllPosts({limit: 3, sortedByDate: true})
 
   const data: LoaderData = {posts}
-
   return json(data)
 }
 

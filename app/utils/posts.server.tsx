@@ -1,23 +1,10 @@
-import type {MdxPage, MdxListItem} from '~/types'
+import type {MdxPage, MdxListItem, Post, PostViews, PostItem} from '~/types'
 import {
   getMdxPage,
   mapFromMdxPageToMdxListItem,
   getMdxPagesInDirectory,
 } from './mdx'
-import {getPostViewsForSlugs, getPostViewsForSlug} from './prisma.server'
-
-interface PostViews {
-  id?: string
-  count: number
-}
-
-export interface Post extends MdxPage {
-  views: PostViews
-}
-
-export interface PostItem extends MdxListItem {
-  views: PostViews
-}
+import {prisma} from './prisma.server'
 
 function toPost(page: MdxPage, views: PostViews): Post {
   return {
@@ -30,6 +17,80 @@ function toPostItem(page: MdxListItem, views: PostViews): PostItem {
   return {
     ...page,
     views,
+  }
+}
+
+async function getAllPostViewsCount() {
+  try {
+    const allViews = await prisma.views.aggregate({
+      _sum: {
+        count: true,
+      },
+    })
+
+    return Number(allViews._sum.count)
+  } catch (error) {
+    console.log(error)
+    return 0
+  }
+}
+
+async function getPostViewsForSlug(slug: string) {
+  try {
+    const postViews = await prisma.views.findFirst({
+      where: {
+        slug: {
+          equals: slug,
+        },
+      },
+    })
+
+    return postViews
+  } catch (error) {
+    console.log(error)
+    return 0
+  }
+}
+
+async function getPostViewsForSlugs(slugs: Array<string>) {
+  try {
+    const allViews = await prisma.views.findMany({
+      select: {
+        id: true,
+        slug: true,
+        count: true,
+      },
+      where: {
+        slug: {
+          in: slugs,
+        },
+      },
+    })
+
+    return allViews
+  } catch (error) {
+    console.log(error)
+    return []
+  }
+}
+
+async function addPostRead(viewId: number | bigint, slug: string) {
+  try {
+    if (viewId) {
+      return prisma.views.update({
+        where: {id: viewId},
+        data: {count: {increment: 1}},
+      })
+    } else {
+      return prisma.views.create({
+        data: {
+          slug,
+          count: 1,
+        },
+      })
+    }
+  } catch (error) {
+    console.log(error)
   }
 }
 
@@ -98,4 +159,11 @@ async function getPost(slug: string): Promise<Post | null> {
   )
 }
 
-export {getAllPosts, getPost}
+export {
+  getAllPosts,
+  getPost,
+  getPostViewsForSlugs,
+  getPostViewsForSlug,
+  getAllPostViewsCount,
+  addPostRead,
+}
