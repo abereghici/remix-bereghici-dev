@@ -16,10 +16,13 @@ type LoaderData = {
 export const loader: AppLoader<{slug: string}> = async ({params}) => {
   const {slug} = params
   const post = await getPost(slug)
+
+  if (!post) {
+    throw json({status: 404})
+  }
+
   const viewId = Number(post.views.id)
-
   await addPostRead(isNaN(viewId) ? 0 : viewId, slug)
-
   const data: LoaderData = {post}
 
   return json(data)
@@ -27,7 +30,8 @@ export const loader: AppLoader<{slug: string}> = async ({params}) => {
 
 export default function FullArticle() {
   const {post} = useLoaderData<LoaderData>()
-  const {title, readingTime, date, code, views} = post
+  const {frontmatter, readTime, code, views} = post
+  const {title, date} = frontmatter
 
   const Component = useMdxComponent(code)
 
@@ -52,7 +56,7 @@ export default function FullArticle() {
           </Paragraph>
         </div>
         <Paragraph size="small" className="mt-2 t min-w-32 md:mt-0">
-          {readingTime.text}
+          {readTime?.text}
           {` • `}
           {views.count} views
         </Paragraph>

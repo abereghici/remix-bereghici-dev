@@ -93,13 +93,18 @@ async function getPostViewsForSlug(slug: string) {
   }
 }
 
-async function getAllPostViews() {
+async function getPostViewsForSlugs(slugs: Array<string>) {
   try {
     const allViews = await prisma.views.findMany({
       select: {
         id: true,
         slug: true,
         count: true,
+      },
+      where: {
+        slug: {
+          in: slugs,
+        },
       },
     })
 
@@ -132,7 +137,7 @@ async function addPostRead(viewId: number | bigint, slug: string) {
 
 export {
   prisma,
-  getAllPostViews,
+  getPostViewsForSlugs,
   getPostViewsForSlug,
   getAllPostViewsCount,
   addPostRead,

@@ -1,10 +1,11 @@
 import * as React from 'react'
 import {Link} from 'remix'
-import type {Post} from '~/utils/posts.server'
+import type {PostItem} from '~/utils/posts.server'
 import {H4, Paragraph} from '~/components/typography'
 
-export default function BlogPost({post}: {post: Post}) {
-  const {title, description, slug, views} = post
+export default function BlogPost({post}: {post: PostItem}) {
+  const {slug, views, frontmatter} = post
+  const {title, description} = frontmatter
   return (
     <Link to={slug} className="block mb-10 group">
       <H4 className="mb-2 group-hover:underline group-focus-within:underline">

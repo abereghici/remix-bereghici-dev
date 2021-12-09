@@ -27,4 +27,10 @@ function getRequiredServerEnvVar(key: string, devValue?: string) {
   return getRequiredEnvVarFromObj(process.env, key, devValue)
 }
 
-export {getDomainUrl, getRequiredServerEnvVar}
+function typedBoolean<T>(
+  value: T,
+): value is Exclude<T, '' | 0 | false | null | undefined> {
+  return Boolean(value)
+}
+
+export {getDomainUrl, getRequiredServerEnvVar, typedBoolean}

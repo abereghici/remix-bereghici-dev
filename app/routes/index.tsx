@@ -5,24 +5,17 @@ import Hero from '~/components/hero'
 import BlogPostCard from '~/components/blog-post-card'
 import {H2} from '~/components/typography'
 import Link from '~/components/link'
-import {getAllPosts, Post} from '~/utils/posts.server'
+import {getAllPosts, PostItem} from '~/utils/posts.server'
 import {ServerError} from '~/components/errors'
 
 type LoaderData = {
-  posts: Post[]
+  posts: PostItem[]
 }
 
 export const loader: LoaderFunction = async () => {
-  const posts = await getAllPosts()
-  const latestPosts = posts
-    .sort((a, b) => {
-      const aDate = a.date instanceof Date ? a.date : new Date(a.date)
-      const bDate = b.date instanceof Date ? b.date : new Date(b.date)
-      return bDate.getTime() - aDate.getTime()
-    })
-    .slice(0, 3)
+  const posts = await getAllPosts({limit: 3, sortedByDate: true})
 
-  const data: LoaderData = {posts: latestPosts}
+  const data: LoaderData = {posts}
 
   return json(data)
 }
@@ -41,7 +34,7 @@ export default function IndexRoute() {
       <Hero />
       <H2 className="tracking-tight mb-6">Latest Posts</H2>
       <div className="flex gap-6 flex-col">
-        {posts.map((post: Post, index: number) => (
+        {posts.map((post: PostItem, index: number) => (
           <BlogPostCard
             key={post.slug}
             post={post}

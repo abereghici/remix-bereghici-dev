@@ -1,4 +1,4 @@
-import {EntryContext, json} from 'remix'
+import type {EntryContext} from 'remix'
 
 type Handler = (
   request: Request,

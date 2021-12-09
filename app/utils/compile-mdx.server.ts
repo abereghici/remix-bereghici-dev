@@ -1,17 +1,39 @@
 import {bundleMDX} from 'mdx-bundler'
 import type TPQueue from 'p-queue'
-import fs from 'fs'
-import calculateReadingTime from 'reading-time'
+import calculateReadingTime, {ReadTimeResults} from 'reading-time'
+import type {GitHubFile} from '~/types'
 
 async function compileMdx<FrontmatterType extends Record<string, unknown>>(
-  dir: string,
-  mdxFile: string,
-) {
+  slug: string,
+  githubFiles: Array<GitHubFile>,
+): Promise<{
+  frontmatter: FrontmatterType
+  code: string
+  readTime: ReadTimeResults
+} | null> {
+  const indexFile = githubFiles.find(
+    ({path}) =>
+      path.includes(`${slug}/index.mdx`) || path.includes(`${slug}/index.md`),
+  )
+
+  if (!indexFile) {
+    return null
+  }
+
+  const rootDir = indexFile.path.replace(/index.mdx?$/, '')
+  const relativeFiles: Array<GitHubFile> = githubFiles.map(
+    ({path, content}) => ({
+      path: path.replace(rootDir, './'),
+      content,
+    }),
+  )
+
+  const files = arrayToObj(relativeFiles, {
+    keyName: 'path',
+    valueName: 'content',
+  })
+
   try {
-    const path = `${__dirname}/../content/${dir}/${mdxFile}`
-
-    const filContent = fs.readFileSync(path, 'utf8')
-
     const {default: remarkGfm} = await import('remark-gfm')
     const {default: rehypeSlug} = await import('rehype-slug')
     const {default: rehypeCodeTitles} = await import('rehype-code-titles')
@@ -21,7 +43,8 @@ async function compileMdx<FrontmatterType extends Record<string, unknown>>(
     const {default: rehypePrism} = await import('rehype-prism-plus')
 
     const {frontmatter, code} = await bundleMDX({
-      source: filContent,
+      source: indexFile.content,
+      files,
       xdmOptions(options) {
         options.remarkPlugins = [...(options.remarkPlugins ?? []), remarkGfm]
         options.rehypePlugins = [
@@ -42,18 +65,33 @@ async function compileMdx<FrontmatterType extends Record<string, unknown>>(
       },
     })
 
-    const readingTime = calculateReadingTime(filContent)
+    const readTime = calculateReadingTime(indexFile.content)
 
     return {
       code,
-      readingTime,
-      slug: mdxFile.replace(/\.(md|mdx)$/, ''),
+      readTime,
       frontmatter: frontmatter as FrontmatterType,
     }
   } catch (error: unknown) {
-    console.error(`Compilation error for mdxFile: `, mdxFile)
+    console.error(`Compilation error for slug: `, slug)
     throw error
   }
+}
+
+function arrayToObj<ItemType extends Record<string, unknown>>(
+  array: Array<ItemType>,
+  {keyName, valueName}: {keyName: keyof ItemType; valueName: keyof ItemType},
+) {
+  const obj: Record<string, ItemType[keyof ItemType]> = {}
+  for (const item of array) {
+    const key = item[keyName]
+    if (typeof key !== 'string') {
+      throw new Error(`${keyName} of item must be a string`)
+    }
+    const value = item[valueName]
+    obj[key] = value
+  }
+  return obj
 }
 
 let _queue: TPQueue | null = null

@@ -2,16 +2,17 @@ import * as React from 'react'
 import clsx from 'clsx'
 import {Link} from 'remix'
 import {H6, Paragraph} from './typography'
-import type {Post} from '~/utils/posts.server'
+import type {PostItem} from '~/utils/posts.server'
 
 export default function BlogPostCard({
   gradient,
   post,
 }: {
-  post: Post
+  post: PostItem
   gradient: string
 }) {
-  const {title, description, slug, views} = post
+  const {frontmatter, slug, views} = post
+  const {title, description} = frontmatter
   return (
     <Link
       prefetch="intent"
