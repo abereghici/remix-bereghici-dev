@@ -8,6 +8,18 @@ function getDomainUrl(request: Request) {
   return `${protocol}://${host}`
 }
 
+function removeTrailingSlash(s: string) {
+  return s.endsWith('/') ? s.slice(0, -1) : s
+}
+
+function getUrl(requestInfo?: {origin: string; path: string}) {
+  return removeTrailingSlash(
+    `${requestInfo?.origin ?? 'https://bereghici.dev'}${
+      requestInfo?.path ?? ''
+    }`,
+  )
+}
+
 function getRequiredEnvVarFromObj(
   obj: Record<string, string | undefined>,
   key: string,
@@ -33,4 +45,4 @@ function typedBoolean<T>(
   return Boolean(value)
 }
 
-export {getDomainUrl, getRequiredServerEnvVar, typedBoolean}
+export {getDomainUrl, getUrl, getRequiredServerEnvVar, typedBoolean}

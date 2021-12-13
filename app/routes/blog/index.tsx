@@ -6,18 +6,25 @@ import {H1, Paragraph} from '~/components/typography'
 import ResponsiveContainer from '~/components/responsive-container'
 import BlogPost from '~/components/blog-post'
 import type {PostItem} from '~/types'
+import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
 
 type LoaderData = {
   posts: PostItem[]
   totalViewsCount: number
 }
 
-export const loader: LoaderFunction = async () => {
-  const posts = await getAllPosts()
+export const loader: LoaderFunction = async ({request}) => {
+  const timings: Timings = {}
+
+  const posts = await getAllPosts({request, timings})
   const totalViewsCount = await getAllPostViewsCount()
 
   const data: LoaderData = {posts, totalViewsCount}
-  return json(data)
+  return json(data, {
+    headers: {
+      'Server-Timing': getServerTimeHeader(timings),
+    },
+  })
 }
 
 export default function Index() {

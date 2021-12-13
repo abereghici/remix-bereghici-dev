@@ -8,16 +8,28 @@ import Link from '~/components/link'
 import {getAllPosts} from '~/utils/posts.server'
 import {ServerError} from '~/components/errors'
 import type {PostItem} from '~/types'
+import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
 
 type LoaderData = {
   posts: PostItem[]
 }
 
-export const loader: LoaderFunction = async () => {
-  const posts = await getAllPosts({limit: 3, sortedByDate: true})
+export const loader: LoaderFunction = async ({request}) => {
+  const timings: Timings = {}
+
+  const posts = await getAllPosts({
+    limit: 3,
+    sortedByDate: true,
+    request,
+    timings,
+  })
 
   const data: LoaderData = {posts}
-  return json(data)
+  return json(data, {
+    headers: {
+      'Server-Timing': getServerTimeHeader(timings),
+    },
+  })
 }
 
 const gradients = [

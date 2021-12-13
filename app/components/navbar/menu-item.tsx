@@ -1,7 +1,6 @@
 import * as React from 'react'
+import {Link, useLocation} from 'remix'
 import clsx from 'clsx'
-import {Link} from 'remix'
-import {useLocation} from 'remix'
 
 export default function MenuItem({
   to,

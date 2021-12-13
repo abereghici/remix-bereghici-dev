@@ -2,13 +2,29 @@ import * as React from 'react'
 import * as mdxBundler from 'mdx-bundler/client'
 import {compileMdx} from '~/utils/compile-mdx.server'
 import {redisCache} from '~/utils/redis.server'
-import {typedBoolean} from '~/utils/misc'
+import {getUrl, typedBoolean} from '~/utils/misc'
 import {getImageBuilder, getImgProps} from '~/utils/images'
 import {
   downloadDirList,
   downloadMdxFileOrDirectory,
 } from '~/utils/github.server'
+import {cachified} from '~/utils/cache.server'
+import {getSocialMetas} from '~/utils/seo'
+
+import type {LoaderData as RootLoaderData} from '../root'
+
 import type {GitHubFile, MdxListItem, MdxPage} from '~/types'
+import type {Timings} from './metrics.server'
+
+type CachifiedOptions = {
+  forceFresh?: boolean | string
+  request?: Request
+  maxAge?: number
+  expires?: Date
+  timings?: Timings
+}
+
+const defaultMaxAge = 1000 * 60 * 60 * 24 * 30
 
 const getCompiledKey = (contentDir: string, slug: string) =>
   `${contentDir}:${slug}:compiled`
@@ -16,154 +32,176 @@ const getDownloadKey = (contentDir: string, slug: string) =>
   `${contentDir}:${slug}:downloaded`
 const getDirListKey = (contentDir: string) => `${contentDir}:dir-list`
 
-async function getMdxPage({
-  contentDir,
-  slug,
-}: {
-  contentDir: string
-  slug: string
-}): Promise<MdxPage | null> {
-  const key = getCompiledKey(contentDir, slug)
+const checkCompiledValue = (value: unknown) =>
+  typeof value === 'object' &&
+  (value === null || ('code' in value && 'frontmatter' in value))
 
-  const cached = await redisCache.get<MdxPage>(key)
-
-  if (cached) {
-    return cached
-  }
-
-  const pageFiles = await downloadMdxFilesCached(contentDir, slug)
-
-  const compiledPage = await compileMdxCached({
+async function getMdxPage(
+  {
     contentDir,
     slug,
-    ...pageFiles,
-  }).catch((err: unknown) => {
-    console.error(`Failed to get a fresh value for mdx:`, {
-      contentDir,
-      slug,
-    })
-    return Promise.reject(err)
+  }: {
+    contentDir: string
+    slug: string
+  },
+  options: CachifiedOptions,
+): Promise<MdxPage | null> {
+  const key = getCompiledKey(contentDir, slug)
+  const page = await cachified({
+    cache: redisCache,
+    maxAge: defaultMaxAge,
+    ...options,
+    // reusing the same key as compiledMdxCached because we just return that
+    // exact same value. Cachifying this allows us to skip getting the cached files
+    key,
+    checkValue: checkCompiledValue,
+    getFreshValue: async () => {
+      const pageFiles = await downloadMdxFilesCached(contentDir, slug, options)
+      const compiledPage = await compileMdxCached({
+        contentDir,
+        slug,
+        ...pageFiles,
+        options,
+      }).catch(err => {
+        console.error(`Failed to get a fresh value for mdx:`, {
+          contentDir,
+          slug,
+        })
+        return Promise.reject(err)
+      })
+      return compiledPage
+    },
   })
-
-  if (compiledPage) {
-    void redisCache.set(key, compiledPage)
-  } else {
+  if (!page) {
+    // if there's no page, let's remove it from the cache
     void redisCache.del(key)
   }
-
-  return compiledPage
+  return page
 }
 
 async function compileMdxCached({
   contentDir,
   slug,
-  files,
   entry,
+  files,
+  options,
 }: {
   contentDir: string
   slug: string
   entry: string
   files: Array<GitHubFile>
-}): Promise<MdxPage | null> {
+  options: CachifiedOptions
+}) {
   const key = getCompiledKey(contentDir, slug)
-  const cached = await redisCache.get<MdxPage>(key)
-
-  if (cached) {
-    return cached
-  }
-
-  const compiledPage = await compileMdx<MdxPage['frontmatter']>(slug, files)
-
-  if (compiledPage) {
-    return {
-      ...compiledPage,
-      slug,
-      editLink: `https://github.com/abereghici/remix-bereghici-dev/edit/main/${entry}`,
-    }
-  } else {
+  const page = await cachified({
+    cache: redisCache,
+    maxAge: defaultMaxAge,
+    ...options,
+    key,
+    checkValue: checkCompiledValue,
+    getFreshValue: async () => {
+      const compiledPage = await compileMdx<MdxPage['frontmatter']>(slug, files)
+      if (compiledPage) {
+        return {
+          ...compiledPage,
+          slug,
+          editLink: `https://github.com/abereghici/remix-bereghici-dev/edit/main/${entry}`,
+        }
+      } else {
+        return null
+      }
+    },
+  })
+  // if there's no page, remove it from the cache
+  if (!page) {
     void redisCache.del(key)
-    return null
   }
+  return page
 }
 
 async function downloadMdxFilesCached(
   contentDir: string,
   slug: string,
-): Promise<{
-  entry: string
-  files: GitHubFile[]
-}> {
+  options: CachifiedOptions,
+) {
   const key = getDownloadKey(contentDir, slug)
+  const downloaded = await cachified({
+    cache: redisCache,
+    maxAge: defaultMaxAge,
+    ...options,
+    key,
+    checkValue: (value: unknown) => {
+      if (typeof value !== 'object') {
+        return `value is not an object`
+      }
+      if (value === null) {
+        return `value is null`
+      }
 
-  const cached = await redisCache.get<
-    Promise<{
-      entry: string
-      files: GitHubFile[]
-    }>
-  >(key)
+      const download = value as Record<string, unknown>
+      if (!Array.isArray(download.files)) {
+        return `value.files is not an array`
+      }
+      if (typeof download.entry !== 'string') {
+        return `value.entry is not a string`
+      }
 
-  if (cached) {
-    return cached
-  }
-
-  const downloaded = await downloadMdxFileOrDirectory(`${contentDir}/${slug}`)
-
-  if (downloaded.files.length) {
-    void redisCache.set(key, downloaded)
-  } else {
+      return true
+    },
+    getFreshValue: async () =>
+      downloadMdxFileOrDirectory(`${contentDir}/${slug}`),
+  })
+  // if there aren't any files, remove it from the cache
+  if (!downloaded.files.length) {
     void redisCache.del(key)
   }
-
   return downloaded
 }
 
-async function getMdxDirList(contentDir: string) {
-  const fullContentDirPath = `content/${contentDir}`
-  const dirList = (await downloadDirList(fullContentDirPath))
-    .map(({name, path}) => ({
-      name,
-      slug: path.replace(`${fullContentDirPath}/`, '').replace(/\.mdx$/, ''),
-    }))
-    .filter(({name}) => name !== 'README.md')
-
-  return dirList
+async function getMdxDirList(contentDir: string, options?: CachifiedOptions) {
+  return cachified({
+    cache: redisCache,
+    maxAge: defaultMaxAge,
+    ...options,
+    key: getDirListKey(contentDir),
+    checkValue: (value: unknown) => Array.isArray(value),
+    getFreshValue: async () => {
+      const fullContentDirPath = `content/${contentDir}`
+      const dirList = (await downloadDirList(fullContentDirPath))
+        .map(({name, path}) => ({
+          name,
+          slug: path
+            .replace(`${fullContentDirPath}/`, '')
+            .replace(/\.mdx$/, ''),
+        }))
+        .filter(({name}) => name !== 'README.md')
+      return dirList
+    },
+  })
 }
 
-async function getMdxPagesInDirectory(contentDir: string) {
-  const key = getDirListKey(contentDir)
-
-  const cached = await redisCache.get<
-    {
-      name: string
-      slug: string
-    }[]
-  >(key)
-
-  if (cached) {
-    return cached
-  }
-
-  const dirList = await getMdxDirList(contentDir)
+async function getMdxPagesInDirectory(
+  contentDir: string,
+  options: CachifiedOptions,
+) {
+  const dirList = await getMdxDirList(contentDir, options)
 
   // our octokit throttle plugin will make sure we don't hit the rate limit
   const pageDatas = await Promise.all(
     dirList.map(async ({slug}) => {
       return {
-        ...(await downloadMdxFilesCached(contentDir, slug)),
+        ...(await downloadMdxFilesCached(contentDir, slug, options)),
         slug,
       }
     }),
   )
 
-  const pages = (
-    await Promise.all(
-      pageDatas.map(pageData => compileMdxCached({contentDir, ...pageData})),
-    )
-  ).filter(typedBoolean)
-
-  void redisCache.set(key, pages)
-
-  return pages
+  const pages = await Promise.all(
+    pageDatas.map(pageData =>
+      compileMdxCached({contentDir, ...pageData, options}),
+    ),
+  )
+  return pages.filter(typedBoolean)
 }
 
 /**
@@ -215,13 +253,50 @@ function useMdxComponent(code: string) {
   return React.useMemo(() => getMdxComponent(code), [code])
 }
 
+function mdxPageMeta({
+  data,
+  parentsData,
+}: {
+  data: {page: MdxPage | null} | null
+  parentsData: {root: RootLoaderData}
+}) {
+  const {requestInfo} = parentsData.root
+  if (data?.page) {
+    const {keywords = [], ...extraMeta} = data.page.frontmatter.meta ?? {}
+    let title = data.page.frontmatter.title
+    const isDraft = data.page.frontmatter.draft
+    if (isDraft) title = `(DRAFT) ${title ?? ''}`
+
+    return {
+      ...(isDraft ? {robots: 'noindex'} : null),
+      ...getSocialMetas({
+        title,
+        description: data.page.frontmatter.description,
+        keywords: keywords.join(', '),
+        url: getUrl(requestInfo),
+        image:
+          data.page.frontmatter.bannerCloudinaryId ??
+          'bereghici-dev/blog/avatar_bwdhvv',
+      }),
+      ...extraMeta,
+    }
+  } else {
+    return {
+      title: 'Not found',
+      description: 'You landed on a page that could not be find 😢',
+    }
+  }
+}
+
 export {
   getMdxPage,
   mapFromMdxPageToMdxListItem,
   getMdxPagesInDirectory,
+  getMdxDirList,
   getMdxComponent,
   useMdxComponent,
   getCompiledKey,
   getDownloadKey,
   getDirListKey,
+  mdxPageMeta,
 }

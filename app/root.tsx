@@ -20,7 +20,8 @@ import {
   Theme,
 } from './utils/theme-provider'
 import {getThemeSession} from './utils/theme.server'
-import {getDomainUrl} from './utils/misc'
+import {getDomainUrl, getUrl} from './utils/misc'
+import {time, getServerTimeHeader, Timings} from './utils/metrics.server'
 import {pathedRoutes} from './other-routes.server'
 import Navbar from './components/navbar'
 import Footer from './components/footer'
@@ -28,9 +29,8 @@ import Footer from './components/footer'
 import tailwindStyles from './styles/tailwind.css'
 import proseStyles from './styles/prose.css'
 import globalStyles from './styles/global.css'
-import {H1, Paragraph} from './components/typography'
-import ResponsiveContainer from './components/responsive-container'
 import {FourOhFour, ServerError} from './components/errors'
+import {getSocialMetas} from './utils/seo'
 
 export let links: LinksFunction = () => {
   return [
@@ -55,15 +55,23 @@ export let links: LinksFunction = () => {
   ]
 }
 
-export const meta: MetaFunction = () => {
+export const meta: MetaFunction = ({data}) => {
+  const requestInfo = (data as LoaderData | undefined)?.requestInfo
+
   const title = 'Alexandru Bereghici · bereghici.dev'
   const description = 'Software engineer specializing in JavaScript ecosystem'
+
   return {
     viewport: 'width=device-width,initial-scale=1,viewport-fit=cover',
     'theme-color': '#111111',
     robots: 'index,follow',
-    title,
-    description,
+    ...getSocialMetas({
+      keywords: 'alexandru, bereghici, frontend, react, javascript, typescript',
+      url: getUrl(requestInfo),
+      image: 'bereghici-dev/blog/avatar_bwdhvv',
+      title,
+      description,
+    }),
   }
 }
 
@@ -84,6 +92,7 @@ export const loader: LoaderFunction = async ({request}) => {
     return new Response()
   }
 
+  const timings: Timings = {}
   const themeSession = await getThemeSession(request)
 
   const data: LoaderData = {
@@ -97,6 +106,7 @@ export const loader: LoaderFunction = async ({request}) => {
   }
 
   const headers: HeadersInit = new Headers()
+  headers.append('Server-Timing', getServerTimeHeader(timings))
 
   return json(data, {headers})
 }

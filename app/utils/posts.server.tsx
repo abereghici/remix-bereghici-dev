@@ -4,6 +4,7 @@ import {
   mapFromMdxPageToMdxListItem,
   getMdxPagesInDirectory,
 } from './mdx'
+import type {Timings} from './metrics.server'
 import {prisma} from './prisma.server'
 
 function toPost(page: MdxPage, views: PostViews): Post {
@@ -94,13 +95,21 @@ async function addPostRead(viewId: number | bigint, slug: string) {
   }
 }
 
-async function getAllPosts(
-  {limit, sortedByDate}: {limit?: number; sortedByDate: boolean} = {
-    sortedByDate: true,
-    limit: undefined,
-  },
-): Promise<Array<PostItem>> {
-  let posts = await getMdxPagesInDirectory('blog')
+async function getAllPosts({
+  limit,
+  sortedByDate = true,
+  request,
+  timings,
+}: {
+  limit?: number
+  sortedByDate?: boolean
+  request: Request
+  timings?: Timings
+}): Promise<Array<PostItem>> {
+  let posts = await getMdxPagesInDirectory('blog', {
+    request,
+    timings,
+  })
 
   if (sortedByDate) {
     posts = posts.sort((a, b) => {
@@ -139,11 +148,22 @@ async function getAllPosts(
   return postsWithViews
 }
 
-async function getPost(slug: string): Promise<Post | null> {
-  const page = await getMdxPage({
-    slug,
-    contentDir: 'blog',
-  })
+async function getPost({
+  slug,
+  request,
+  timings,
+}: {
+  slug: string
+  request: Request
+  timings?: Timings
+}): Promise<Post | null> {
+  const page = await getMdxPage(
+    {
+      slug,
+      contentDir: 'blog',
+    },
+    {request, timings},
+  )
 
   if (!page) {
     return null

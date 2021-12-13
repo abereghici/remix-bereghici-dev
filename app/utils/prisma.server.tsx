@@ -1,5 +1,4 @@
-import {PrismaClient, views} from '@prisma/client'
-import chalk from 'chalk'
+import {PrismaClient} from '@prisma/client'
 import {getRequiredServerEnvVar} from './misc'
 
 declare global {
@@ -40,17 +39,7 @@ function getClient(connectionUrl: URL): PrismaClient {
   client.$on('query', (e: {duration: number; query: any}) => {
     if (e.duration < logThreshold) return
 
-    const color =
-      e.duration < 30
-        ? 'green'
-        : e.duration < 50
-        ? 'blue'
-        : e.duration < 80
-        ? 'yellow'
-        : e.duration < 100
-        ? 'redBright'
-        : 'red'
-    const dur = chalk[color](`${e.duration}ms`)
+    const dur = `${e.duration}ms`
     console.log(`prisma:query - ${dur} - ${e.query}`)
   })
   // make the connection eagerly so the first request doesn't have to wait

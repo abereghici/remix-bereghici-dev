@@ -2,7 +2,7 @@
 FROM node:16-bullseye-slim as base
 
 # install open ssl for prisma
-RUN apt-get update && apt-get install -y openssl 
+RUN apt-get update && apt-get install -y openssl ca-certificates
 
 # install all node_modules, including dev
 FROM base as deps

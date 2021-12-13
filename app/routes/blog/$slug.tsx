@@ -1,37 +1,58 @@
 import * as React from 'react'
-import {json, useCatch, useLoaderData} from 'remix'
+import {json, LinksFunction, useCatch, useLoaderData} from 'remix'
 import parseISO from 'date-fns/parseISO'
 import format from 'date-fns/format'
-import {useMdxComponent} from '~/utils/mdx'
+import {mdxPageMeta, useMdxComponent} from '~/utils/mdx'
 import {getPost, addPostRead} from '~/utils/posts.server'
 import ResponsiveContainer from '~/components/responsive-container'
 import {H1, Paragraph} from '~/components/typography'
 import {FourOhFour, ServerError} from '~/components/errors'
 import type {AppLoader, Post} from '~/types'
 
-type LoaderData = {
-  post: Post
+import codeHighlightStyles from '~/styles/code-highlight.css'
+import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+
+export let links: LinksFunction = () => {
+  return [{rel: 'stylesheet', href: codeHighlightStyles}]
 }
 
-export const loader: AppLoader<{slug: string}> = async ({params}) => {
+export const meta = mdxPageMeta
+
+type LoaderData = {
+  page: Post
+}
+
+export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
+  const timings: Timings = {}
+
   const {slug} = params
-  const post = await getPost(slug)
+  const post = await getPost({
+    slug,
+    request,
+    timings,
+  })
+
+  const headers = {
+    'Server-Timing': getServerTimeHeader(timings),
+  }
 
   if (!post) {
-    throw json(null, {status: 404})
+    throw json(null, {status: 404, headers})
   }
 
   const viewId = Number(post.views.id)
   void addPostRead(isNaN(viewId) ? 0 : viewId, slug)
 
-  const data: LoaderData = {post}
+  const data: LoaderData = {page: post}
 
-  return json(data)
+  return json(data, {
+    headers,
+  })
 }
 
 export default function FullArticle() {
-  const {post} = useLoaderData<LoaderData>()
-  const {frontmatter, readTime, code, views} = post
+  const {page} = useLoaderData<LoaderData>()
+  const {frontmatter, readTime, code, views} = page
   const {title, date} = frontmatter
 
   const Component = useMdxComponent(code)
