@@ -1,8 +1,8 @@
 import * as React from 'react'
 import clsx from 'clsx'
 import {Link} from 'remix'
-import {H6, Paragraph} from './typography'
-import type {PostItem} from '~/utils/posts.server'
+import {Paragraph, Title} from './typography'
+import type {PostItem} from '~/types'
 
 export default function BlogPostCard({
   gradient,
@@ -24,7 +24,9 @@ export default function BlogPostCard({
       )}
     >
       <div className="flex flex-col justify-between h-full bg-primary rounded-lg p-4">
-        <H6 className="mb-2 w-full tracking-tight">{title}</H6>
+        <Title as="h3" size="h6" className="mb-2 w-full tracking-tight">
+          {title}
+        </Title>
         <Paragraph size="small" variant="secondary" className="mb-6 sm:mb-10">
           {description}
         </Paragraph>

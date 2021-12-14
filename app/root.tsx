@@ -23,6 +23,7 @@ import {getThemeSession} from '~/utils/theme.server'
 import {getDomainUrl, getDisplayUrl} from '~/utils/misc'
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
 import {getSocialMetas} from './utils/seo'
+import {getEnv} from '~/utils/env.server'
 import {pathedRoutes} from '~/other-routes.server'
 import Navbar from '~/components/navbar'
 import Footer from '~/components/footer'
@@ -76,6 +77,7 @@ export const meta: MetaFunction = ({data}) => {
 }
 
 export type LoaderData = {
+  ENV: ReturnType<typeof getEnv>
   requestInfo: {
     origin: string
     path: string
@@ -96,6 +98,7 @@ export const loader: LoaderFunction = async ({request}) => {
   const themeSession = await getThemeSession(request)
 
   const data: LoaderData = {
+    ENV: getEnv(),
     requestInfo: {
       origin: getDomainUrl(request),
       path: new URL(request.url).pathname,
@@ -135,7 +138,12 @@ function App() {
         <Footer />
         <ScrollRestoration />
         <Scripts />
-        {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(data.ENV)};`,
+          }}
+        />
+        {data.ENV.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>
     </html>
   )

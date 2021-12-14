@@ -65,7 +65,7 @@ function ErrorPage({
         </Paragraph>
       ) : null}
 
-      {error && process.env.NODE_ENV === 'development' ? (
+      {error && ENV.NODE_ENV === 'development' ? (
         <RedBox error={error} />
       ) : null}
     </ResponsiveContainer>

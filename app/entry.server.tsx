@@ -29,6 +29,23 @@ export default async function handleRequest(
   responseHeaders.set('Content-Type', 'text/html')
   responseHeaders.set('Content-Length', String(Buffer.byteLength(html)))
 
+  // https://securityheaders.com
+  const ContentSecurityPolicy = `
+  default-src 'self';
+  worker-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  child-src 'self';
+  style-src 'self' 'unsafe-inline' ;
+  img-src * blob: data:;
+  media-src 'none';
+  connect-src *;
+  font-src 'self';
+`
+  responseHeaders.set(
+    'Content-Security-Policy',
+    ContentSecurityPolicy.replace(/\n/g, ''),
+  )
+
   return new Response(html, {
     status: responseStatusCode,
     headers: responseHeaders,
