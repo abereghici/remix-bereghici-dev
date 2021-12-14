@@ -1,4 +1,4 @@
-import {buildImageUrl} from 'cloudinary-build-url'
+import {getImageBuilder} from './images'
 
 export function getSocialMetas({
   url,
@@ -13,7 +13,10 @@ export function getSocialMetas({
   description?: string
   keywords?: string
 }) {
-  const imageUrl = buildImageUrl(image, {})
+  const imageUrl = getImageBuilder(image)({
+    quality: 'auto',
+    format: 'auto',
+  })
 
   return {
     title,

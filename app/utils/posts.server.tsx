@@ -1,9 +1,5 @@
 import type {MdxPage, MdxListItem, Post, PostViews, PostItem} from '~/types'
-import {
-  getMdxPage,
-  mapFromMdxPageToMdxListItem,
-  getMdxPagesInDirectory,
-} from './mdx'
+import {getMdxPage, getBlogMdxListItems} from './mdx'
 import type {Timings} from './metrics.server'
 import {prisma} from './prisma.server'
 
@@ -97,34 +93,19 @@ async function addPostRead(viewId: number | bigint, slug: string) {
 
 async function getAllPosts({
   limit,
-  sortedByDate = true,
+
   request,
   timings,
 }: {
   limit?: number
-  sortedByDate?: boolean
+
   request: Request
   timings?: Timings
 }): Promise<Array<PostItem>> {
-  let posts = await getMdxPagesInDirectory('blog', {
+  let posts = await getBlogMdxListItems({
     request,
     timings,
   })
-
-  if (sortedByDate) {
-    posts = posts.sort((a, b) => {
-      const aDate =
-        a.frontmatter.date instanceof Date
-          ? a.frontmatter.date
-          : new Date(a.frontmatter.date)
-      const bDate =
-        b.frontmatter.date instanceof Date
-          ? b.frontmatter.date
-          : new Date(b.frontmatter.date)
-
-      return bDate.getTime() - aDate.getTime()
-    })
-  }
 
   if (limit) {
     posts = posts.slice(0, limit)
@@ -137,7 +118,7 @@ async function getAllPosts({
 
     return {
       ...toPostItem(
-        mapFromMdxPageToMdxListItem(post),
+        post,
         views
           ? {id: String(views.id), count: Number(views.count)}
           : {id: undefined, count: 0},

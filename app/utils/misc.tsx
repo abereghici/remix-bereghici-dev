@@ -20,6 +20,10 @@ function getUrl(requestInfo?: {origin: string; path: string}) {
   )
 }
 
+function getDisplayUrl(requestInfo?: {origin: string; path: string}) {
+  return getUrl(requestInfo).replace(/^https?:\/\//, '')
+}
+
 function getRequiredEnvVarFromObj(
   obj: Record<string, string | undefined>,
   key: string,
@@ -45,4 +49,11 @@ function typedBoolean<T>(
   return Boolean(value)
 }
 
-export {getDomainUrl, getUrl, getRequiredServerEnvVar, typedBoolean}
+export {
+  getDomainUrl,
+  getUrl,
+  getDisplayUrl,
+  getRequiredServerEnvVar,
+  typedBoolean,
+  removeTrailingSlash,
+}

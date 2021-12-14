@@ -18,19 +18,19 @@ import {
   ThemeProvider,
   NonFlashOfWrongThemeEls,
   Theme,
-} from './utils/theme-provider'
-import {getThemeSession} from './utils/theme.server'
-import {getDomainUrl, getUrl} from './utils/misc'
-import {time, getServerTimeHeader, Timings} from './utils/metrics.server'
-import {pathedRoutes} from './other-routes.server'
-import Navbar from './components/navbar'
-import Footer from './components/footer'
+} from '~/utils/theme-provider'
+import {getThemeSession} from '~/utils/theme.server'
+import {getDomainUrl, getDisplayUrl} from '~/utils/misc'
+import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+import {getSocialMetas} from './utils/seo'
+import {pathedRoutes} from '~/other-routes.server'
+import Navbar from '~/components/navbar'
+import Footer from '~/components/footer'
+import {FourOhFour, ServerError} from '~/components/errors'
 
 import tailwindStyles from './styles/tailwind.css'
 import proseStyles from './styles/prose.css'
 import globalStyles from './styles/global.css'
-import {FourOhFour, ServerError} from './components/errors'
-import {getSocialMetas} from './utils/seo'
 
 export let links: LinksFunction = () => {
   return [
@@ -67,7 +67,7 @@ export const meta: MetaFunction = ({data}) => {
     robots: 'index,follow',
     ...getSocialMetas({
       keywords: 'alexandru, bereghici, frontend, react, javascript, typescript',
-      url: getUrl(requestInfo),
+      url: getDisplayUrl(requestInfo),
       image: 'bereghici-dev/blog/avatar_bwdhvv',
       title,
       description,

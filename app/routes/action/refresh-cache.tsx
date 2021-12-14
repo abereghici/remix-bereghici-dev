@@ -5,10 +5,15 @@ import type {ActionFunction} from 'remix'
 import {getRequiredServerEnvVar} from '~/utils/misc'
 import {redisCache} from '~/utils/redis.server'
 import {getMdxPagesInDirectory, getMdxDirList, getMdxPage} from '~/utils/mdx'
+import type {AppHandle} from '~/types'
 
 type Body =
   | {keys: Array<string>; commitSha?: string}
   | {contentPaths: Array<string>; commitSha?: string}
+
+export const handle: AppHandle = {
+  getSitemapEntries: () => null,
+}
 
 export const action: ActionFunction = async ({request}) => {
   // Everything in this function is fire and forget, so we don't need to await

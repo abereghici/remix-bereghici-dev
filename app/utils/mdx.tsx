@@ -204,6 +204,33 @@ async function getMdxPagesInDirectory(
   return pages.filter(typedBoolean)
 }
 
+async function getBlogMdxListItems(options: CachifiedOptions) {
+  return cachified({
+    cache: redisCache,
+    maxAge: defaultMaxAge,
+    ...options,
+    key: 'blog:mdx-list-items',
+    getFreshValue: async () => {
+      let pages = await getMdxPagesInDirectory('blog', options)
+
+      pages = pages.sort((a, b) => {
+        const aDate =
+          a.frontmatter.date instanceof Date
+            ? a.frontmatter.date
+            : new Date(a.frontmatter.date)
+        const bDate =
+          b.frontmatter.date instanceof Date
+            ? b.frontmatter.date
+            : new Date(b.frontmatter.date)
+
+        return bDate.getTime() - aDate.getTime()
+      })
+
+      return pages.map(mapFromMdxPageToMdxListItem)
+    },
+  })
+}
+
 /**
  * This is useful for when you don't want to send all the code for a page to the client.
  */
@@ -293,6 +320,7 @@ export {
   mapFromMdxPageToMdxListItem,
   getMdxPagesInDirectory,
   getMdxDirList,
+  getBlogMdxListItems,
   getMdxComponent,
   useMdxComponent,
   getCompiledKey,

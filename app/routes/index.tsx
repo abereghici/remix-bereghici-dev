@@ -19,7 +19,6 @@ export const loader: LoaderFunction = async ({request}) => {
 
   const posts = await getAllPosts({
     limit: 3,
-    sortedByDate: true,
     request,
     timings,
   })

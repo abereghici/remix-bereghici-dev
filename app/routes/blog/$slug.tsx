@@ -2,12 +2,12 @@ import * as React from 'react'
 import {json, LinksFunction, useCatch, useLoaderData} from 'remix'
 import parseISO from 'date-fns/parseISO'
 import format from 'date-fns/format'
-import {mdxPageMeta, useMdxComponent} from '~/utils/mdx'
+import {mdxPageMeta, useMdxComponent, getBlogMdxListItems} from '~/utils/mdx'
 import {getPost, addPostRead} from '~/utils/posts.server'
 import ResponsiveContainer from '~/components/responsive-container'
 import {H1, Paragraph} from '~/components/typography'
 import {FourOhFour, ServerError} from '~/components/errors'
-import type {AppLoader, Post} from '~/types'
+import type {AppHandle, AppLoader, Post} from '~/types'
 
 import codeHighlightStyles from '~/styles/code-highlight.css'
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
@@ -20,6 +20,19 @@ export const meta = mdxPageMeta
 
 type LoaderData = {
   page: Post
+}
+
+const handleId = 'blog-post'
+export const handle: AppHandle = {
+  id: handleId,
+  getSitemapEntries: async request => {
+    const pages = await getBlogMdxListItems({request})
+    return pages
+      .filter(page => !page.frontmatter.draft)
+      .map(page => {
+        return {route: `/blog/${page.slug}`, priority: 0.7}
+      })
+  },
 }
 
 export const loader: AppLoader<{slug: string}> = async ({request, params}) => {

@@ -3,6 +3,11 @@ import {json, redirect} from 'remix'
 import type {ActionFunction} from 'remix'
 import {getThemeSession} from '~/utils/theme.server'
 import {isTheme} from '~/utils/theme-provider'
+import type {AppHandle} from '~/types'
+
+export const handle: AppHandle = {
+  getSitemapEntries: () => null,
+}
 
 export const action: ActionFunction = async ({request}) => {
   const themeSession = await getThemeSession(request)

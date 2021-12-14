@@ -1,4 +1,6 @@
 import type {EntryContext} from 'remix'
+import {getSitemapXml} from '~/utils/sitemap.server'
+import {getRssFeedXml} from '~/utils/blog-rss-feed.server'
 
 type Handler = (
   request: Request,
@@ -9,8 +11,7 @@ type Handler = (
 // our `routes/$slug.tsx` catch-all route.
 const pathedRoutes: Record<string, Handler> = {
   '/blog/rss.xml': async request => {
-    // const rss = await getRssFeedXml(request)
-    const rss = ''
+    const rss = await getRssFeedXml(request)
     return new Response(rss, {
       headers: {
         'Content-Type': 'application/xml',
@@ -19,8 +20,7 @@ const pathedRoutes: Record<string, Handler> = {
     })
   },
   '/sitemap.xml': async (request, remixContext) => {
-    //const sitemap = await getSitemapXml(request, remixContext)
-    const sitemap = ''
+    const sitemap = await getSitemapXml(request, remixContext)
     return new Response(sitemap, {
       headers: {
         'Content-Type': 'application/xml',
