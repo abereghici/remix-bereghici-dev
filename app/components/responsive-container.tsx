@@ -13,7 +13,7 @@ const ResponsiveContainer = React.forwardRef<HTMLElement, Props>(
     return (
       <Component
         className={clsx(
-          'px-8 md:box-border md:w-full md:max-w-2xl md:mx-auto',
+          'px-8 md:mx-auto md:w-full md:max-w-2xl md:box-border',
           className,
         )}
         ref={ref}

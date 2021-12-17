@@ -55,7 +55,7 @@ function ErrorPage({
   message: string
 }) {
   return (
-    <ResponsiveContainer className="text-center mt-20 mb-20">
+    <ResponsiveContainer className="mb-20 mt-20 text-center">
       <H1 className="mb-4">{errorCode}</H1>
       <H5 className="text-secondary">{message}</H5>
       {['404', '500'].includes(errorCode) ? (

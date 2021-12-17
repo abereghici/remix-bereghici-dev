@@ -3,14 +3,14 @@ import {H1, Paragraph} from '~/components/typography'
 
 export default function Hero() {
   return (
-    <div className="flex flex-col-reverse sm:flex-row items-start">
+    <div className="flex flex-col-reverse items-start sm:flex-row">
       <div className="flex flex-col pr-8">
         <H1>Alexandru Bereghici</H1>
-        <Paragraph className="mt-4 mb-16" variant="secondary" size="large">
+        <Paragraph className="mb-16 mt-4" variant="secondary" size="large">
           Software engineer specializing in JavaScript ecosystem.
         </Paragraph>
       </div>
-      <div className="w-[80px] sm:w-[176px] relative mb-8 sm:mb-0 mr-auto">
+      <div className="w-[80px] sm:w-[176px] relative mb-8 mr-auto sm:mb-0">
         <img
           alt="Alexandru Bereghici"
           height={176}

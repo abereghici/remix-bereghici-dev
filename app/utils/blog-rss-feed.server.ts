@@ -19,10 +19,8 @@ async function getRssFeedXml(request: Request) {
           .map(post =>
             `
             <item>
-              <title>${cdata(post.frontmatter.title ?? 'Untitled Post')}</title>
-              <description>${cdata(
-                post.frontmatter.description ?? 'This post is... indescribable',
-              )}</description>
+              <title>${cdata(post.frontmatter.title)}</title>
+              <description>${cdata(post.frontmatter.description)}</description>
               <pubDate>${dateFns.format(
                 dateFns.add(
                   post.frontmatter.date

@@ -16,7 +16,7 @@ export default async function handleRequest(
     if (otherRouteResponse) return otherRouteResponse
   }
 
-  let markup = renderToString(
+  const markup = renderToString(
     <RemixServer context={remixContext} url={request.url} />,
   )
 
@@ -33,7 +33,7 @@ export default async function handleRequest(
   const ContentSecurityPolicy = `
   default-src 'self';
   worker-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googletagmanager.com;
   child-src 'self';
   style-src 'self' 'unsafe-inline' ;
   img-src * blob: data:;

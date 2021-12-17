@@ -1,4 +1,4 @@
-const {performance} = require('perf_hooks')
+import {performance} from 'perf_hooks'
 
 type Timings = Record<string, Array<{name: string; type: string; time: number}>>
 
@@ -20,6 +20,7 @@ async function time<ReturnType>({
   type = type.replace(/ /g, '_')
   let timingType = timings[type]
   if (!timingType) {
+    // eslint-disable-next-line no-multi-assign
     timingType = timings[type] = []
   }
 

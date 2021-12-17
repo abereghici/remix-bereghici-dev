@@ -28,12 +28,12 @@ export const loader: LoaderFunction = async ({request}) => {
 }
 
 export default function Index() {
-  let {posts, totalViewsCount} = useLoaderData<LoaderData>()
+  const {posts, totalViewsCount} = useLoaderData<LoaderData>()
 
   return (
     <ResponsiveContainer>
       <H1 className="mb-2 w-full tracking-tight">All posts</H1>
-      <Paragraph className="mb-10 block" as="em">
+      <Paragraph className="block mb-10" as="em">
         Total views: {totalViewsCount}
       </Paragraph>
       <ul>

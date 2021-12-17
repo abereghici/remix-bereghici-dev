@@ -10,7 +10,7 @@ export default function MenuToggle({
 }) {
   return (
     <button
-      className="visible md:hidden w-9 h-9 -ml-2 flex items-center justify-center rounded-lg hover:ring-2 ring-gray-300 transition-shadow"
+      className="flex items-center justify-center -ml-2 w-9 h-9 rounded-lg visible transition-shadow hover:ring-2 ring-gray-300 md:hidden"
       aria-label="Toggle menu"
       type="button"
       onClick={onToggle}
@@ -27,8 +27,8 @@ function MenuIcon({
 }: JSX.IntrinsicElements['svg'] & {hidden: boolean}) {
   return (
     <svg
-      className={clsx('h-5 w-5 absolute text-gray-900 dark:text-gray-100', {
-        hidden: hidden,
+      className={clsx('absolute w-5 h-5 dark:text-gray-100 text-gray-900', {
+        hidden,
       })}
       width="20"
       height="20"
@@ -60,8 +60,8 @@ function CloseIcon({
 }: JSX.IntrinsicElements['svg'] & {hidden: boolean}) {
   return (
     <svg
-      className={clsx('h-5 w-5 absolute text-gray-900 dark:text-gray-100', {
-        hidden: hidden,
+      className={clsx('absolute w-5 h-5 dark:text-gray-100 text-gray-900', {
+        hidden,
       })}
       viewBox="0 0 24 24"
       width="24"

@@ -38,13 +38,13 @@ const gradients = [
 ]
 
 export default function IndexRoute() {
-  let {posts} = useLoaderData<LoaderData>()
+  const {posts} = useLoaderData<LoaderData>()
 
   return (
     <ResponsiveContainer>
       <Hero />
-      <H2 className="tracking-tight mb-6">Latest Posts</H2>
-      <div className="flex gap-6 flex-col">
+      <H2 className="mb-6 tracking-tight">Latest Posts</H2>
+      <div className="flex flex-col gap-6">
         {posts.map((post: PostItem, index: number) => (
           <BlogPostCard
             key={post.slug}
@@ -55,23 +55,12 @@ export default function IndexRoute() {
       </div>
       <Link
         to="/blog"
-        className="flex mt-8 leading-7 rounded-lg transition-all h-6"
+        className="flex items-center mt-8 h-6 leading-7 rounded-lg transition-all"
       >
         Read all posts
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          className="h-6 w-6 ml-1"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17.5 12h-15m11.667-4l3.333 4-3.333-4zm3.333 4l-3.333 4 3.333-4z"
-          />
-        </svg>
+        <span role="img" aria-label="read-all-posts" className="ml-2 text-2xl">
+          👉
+        </span>
       </Link>
     </ResponsiveContainer>
   )

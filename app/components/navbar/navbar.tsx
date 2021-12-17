@@ -11,7 +11,7 @@ export default function NavBar() {
   return (
     <ResponsiveContainer
       as="nav"
-      className="flex items-center justify-between pt-8 pb-8 sm:pb-16"
+      className="flex items-center justify-between pb-8 pt-8 sm:pb-16"
     >
       <SkipNav />
       <div>

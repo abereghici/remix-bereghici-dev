@@ -289,10 +289,10 @@ function mdxPageMeta({
 }) {
   const {requestInfo} = parentsData.root
   if (data?.page) {
-    const {keywords = [], ...extraMeta} = data.page.frontmatter.meta ?? {}
+    const {keywords = [], ...extraMeta} = data.page.frontmatter.meta
     let title = data.page.frontmatter.title
     const isDraft = data.page.frontmatter.draft
-    if (isDraft) title = `(DRAFT) ${title ?? ''}`
+    if (isDraft) title = `(DRAFT) ${title}`
 
     return {
       ...(isDraft ? {robots: 'noindex'} : null),

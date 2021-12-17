@@ -33,7 +33,7 @@ import tailwindStyles from './styles/tailwind.css'
 import proseStyles from './styles/prose.css'
 import globalStyles from './styles/global.css'
 
-export let links: LinksFunction = () => {
+export const links: LinksFunction = () => {
   return [
     {
       rel: 'preload',
@@ -141,6 +141,22 @@ function App() {
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(data.ENV)};`,
+          }}
+        />
+        <script
+          src={`https://www.googletagmanager.com/gtag/js?id=${data.ENV.GA_TRACKING_ID}`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+      gtag('config', '${data.ENV.GA_TRACKING_ID}', {
+        page_path: window.location.pathname,
+      });
+      `,
           }}
         />
         {data.ENV.NODE_ENV === 'development' ? <LiveReload /> : null}

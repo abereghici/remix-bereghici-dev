@@ -26,7 +26,7 @@ async function getAllPostViewsCount() {
     })
 
     return Number(allViews._sum.count)
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error)
     return 0
   }
@@ -43,7 +43,7 @@ async function getPostViewsForSlug(slug: string) {
     })
 
     return postViews
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error)
     return 0
   }
@@ -65,7 +65,7 @@ async function getPostViewsForSlugs(slugs: Array<string>) {
     })
 
     return allViews
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error)
     return []
   }
@@ -74,19 +74,19 @@ async function getPostViewsForSlugs(slugs: Array<string>) {
 async function addPostRead(viewId: number | bigint, slug: string) {
   try {
     if (viewId) {
-      return prisma.views.update({
+      return await prisma.views.update({
         where: {id: viewId},
         data: {count: {increment: 1}},
       })
     } else {
-      return prisma.views.create({
+      return await prisma.views.create({
         data: {
           slug,
           count: 1,
         },
       })
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error)
   }
 }

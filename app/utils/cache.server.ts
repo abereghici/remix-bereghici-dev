@@ -1,6 +1,6 @@
 import formatDuration from 'date-fns/formatDuration'
 import intervalToDuration from 'date-fns/intervalToDuration'
-const {performance} = require('perf_hooks')
+import {performance} from 'perf_hooks'
 import {time, Timings} from '~/utils/metrics.server'
 
 function niceFormatDuration(milliseconds: number) {
@@ -122,6 +122,7 @@ async function cachified<
           // requests triggered a refresh of the same resource, so that's what
           // the keysRefreshing thing is for to ensure we don't refresh a
           // value if it's already in the process of being refreshed.
+          // eslint-disable-next-line max-depth
           if (!keysRefreshing.has(key)) {
             keysRefreshing.add(key)
             setTimeout(() => {

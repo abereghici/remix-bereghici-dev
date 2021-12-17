@@ -3,12 +3,23 @@ import onFinished from 'on-finished'
 import express from 'express'
 import compression from 'compression'
 import morgan from 'morgan'
+import Sentry from '@sentry/node'
 import {createRequestHandler} from '@remix-run/express'
+// eslint-disable-next-line import/no-extraneous-dependencies
 import {installGlobals} from '@remix-run/node/globals'
 
 installGlobals()
 
 const here = (...d: Array<string>) => path.join(__dirname, ...d)
+
+if (process.env.FLY) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: 0.3,
+    environment: process.env.NODE_ENV,
+  })
+  Sentry.setContext('region', {name: process.env.FLY_REGION ?? 'unknown'})
+}
 
 const MODE = process.env.NODE_ENV
 const BUILD_DIR = path.join(process.cwd(), 'build')

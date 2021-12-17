@@ -1,6 +1,5 @@
 import * as React from 'react'
-import {Link} from 'remix'
-import {useLocation} from 'remix'
+import {Link,useLocation} from 'remix'
 import clsx from 'clsx'
 
 export default function NavLink({
@@ -16,7 +15,7 @@ export default function NavLink({
       <Link
         prefetch="intent"
         className={clsx(
-          'hidden md:inline-block p-1 sm:px-3 sm:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800',
+          'dark:hover:bg-gray-800 hidden p-1 hover:bg-gray-200 rounded-lg sm:px-3 sm:py-2 md:inline-block',
           {
             'font-semibold text-gray-800 dark:text-gray-200': isSelected,
             'font-normal text-gray-600 dark:text-gray-400': !isSelected,

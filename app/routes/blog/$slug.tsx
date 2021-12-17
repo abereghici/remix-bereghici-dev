@@ -12,7 +12,7 @@ import type {AppHandle, AppLoader, Post} from '~/types'
 import codeHighlightStyles from '~/styles/code-highlight.css'
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
 
-export let links: LinksFunction = () => {
+export const links: LinksFunction = () => {
   return [{rel: 'stylesheet', href: codeHighlightStyles}]
 }
 
@@ -73,7 +73,7 @@ export default function FullArticle() {
   return (
     <ResponsiveContainer>
       <H1 className="mb-4 tracking-tight">{title}</H1>
-      <div className="flex flex-col items-start justify-between w-full mt-2 md:flex-row md:items-center">
+      <div className="flex flex-col items-start justify-between mt-2 w-full md:flex-row md:items-center">
         <div className="flex items-center">
           <img
             alt="Alexandru Bereghici"
@@ -82,7 +82,7 @@ export default function FullArticle() {
             src="/avatar.jpeg"
             className="rounded-full"
           />
-          <Paragraph className="ml-2 " size="small">
+          <Paragraph className="ml-2" size="small">
             {'Alexandru Bereghici / '}
             {format(
               date instanceof Date ? date : parseISO(date),
@@ -90,13 +90,13 @@ export default function FullArticle() {
             )}
           </Paragraph>
         </div>
-        <Paragraph size="small" className="mt-2 t min-w-32 md:mt-0">
+        <Paragraph size="small" className="t min-w-32 mt-2 md:mt-0">
           {readTime?.text}
           {` • `}
           {views.count} views
         </Paragraph>
       </div>
-      <div className="mt-9 prose dark:prose-dark">
+      <div className="prose dark:prose-dark mt-9">
         <Component />
       </div>
     </ResponsiveContainer>

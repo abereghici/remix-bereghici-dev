@@ -56,6 +56,15 @@ module.exports = {
       spacing: {
         '5vw': '5vw',
       },
+      animation: {
+        'fade-in-stroke': 'fadeInStroke 0.5s ease-in-out',
+      },
+      keyframes: theme => ({
+        fadeInStroke: {
+          '0%': {stroke: theme('colors.transparent')},
+          '100%': {stroke: theme('colors.current')},
+        },
+      }),
       typography: theme => ({
         DEFAULT: {
           css: {

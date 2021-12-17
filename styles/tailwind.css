@@ -36,10 +36,10 @@
   }
 
   .text-secondary {
-    @apply text-gray-600 dark:text-gray-200;
+    @apply dark:text-gray-200 text-gray-600;
   }
 
   .text-inverse {
-    @apply text-white dark:text-black;
+    @apply dark:text-black text-white;
   }
 }
