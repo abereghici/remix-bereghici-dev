@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {json, LoaderFunction, useLoaderData} from 'remix'
-import {getAllPosts, getAllPostViewsCount} from '~/utils/posts.server'
+import {getAllPosts, getAllPostViewsCount} from '~/utils/blog.server'
 import {ServerError} from '~/components/errors'
 import {H1, Paragraph} from '~/components/typography'
 import ResponsiveContainer from '~/components/responsive-container'

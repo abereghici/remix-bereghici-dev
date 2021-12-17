@@ -12,6 +12,14 @@ function niceFormatDuration(milliseconds: number) {
     .join(', ')
 }
 
+export type CachifiedOptions = {
+  forceFresh?: boolean | string
+  request?: Request
+  maxAge?: number
+  expires?: Date
+  timings?: Timings
+}
+
 type CacheMetadata = {
   createdTime: number
   maxAge: number | null

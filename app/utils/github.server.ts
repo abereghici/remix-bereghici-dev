@@ -1,7 +1,7 @@
 import nodePath from 'path'
 import {Octokit as createOctokit} from '@octokit/rest'
 import {throttling} from '@octokit/plugin-throttling'
-import type {GitHubFile} from '~/types'
+import type {GitHubFile, GitHubRepo} from '~/types'
 
 const Octokit = createOctokit.plugin(throttling)
 
@@ -174,4 +174,52 @@ async function downloadDirList(path: string) {
   return data
 }
 
-export {downloadMdxFileOrDirectory, downloadDirList, downloadFile}
+interface RepoResponseData {
+  user: {
+    repositoriesContributedTo: {
+      nodes: GitHubRepo[]
+    }
+  }
+}
+
+/**
+ *
+ * @returns a promise that resolves to an array of GitHubRepo repositories that the user has contributed to
+ */
+async function getRepositoriesContributedTo() {
+  const limit = 50
+  const query = `
+  query repositoriesContributedTo($username: String! $limit: Int!) {
+    user (login: $username) {
+      repositoriesContributedTo(last: $limit, privacy: PUBLIC, includeUserRepositories: true, contributionTypes: [COMMIT, PULL_REQUEST, REPOSITORY]) {
+        nodes {
+          id
+          name
+          url
+          description
+          owner {
+            login
+          }
+        }
+      }
+    }
+  }`
+
+  const data = await octokit.graphql<RepoResponseData>(query, {
+    username: 'abereghici',
+    limit,
+  })
+
+  return {
+    contributedRepos: data.user.repositoriesContributedTo.nodes
+      .reverse()
+      .filter(repo => repo.owner.login !== 'abereghici'),
+  }
+}
+
+export {
+  downloadMdxFileOrDirectory,
+  downloadDirList,
+  downloadFile,
+  getRepositoriesContributedTo,
+}

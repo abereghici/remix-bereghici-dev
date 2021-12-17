@@ -1,29 +1,39 @@
 import * as React from 'react'
 import {json, LoaderFunction, useLoaderData} from 'remix'
+import {getAllPosts} from '~/utils/blog.server'
+
+import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+import {getGithubContributions} from '~/utils/homepage.server'
+import GithubRepoCard from '~/components/github-repo-card'
 import ResponsiveContainer from '~/components/responsive-container'
 import Hero from '~/components/hero'
 import BlogPostCard from '~/components/blog-post-card'
 import {H2} from '~/components/typography'
 import Link from '~/components/link'
-import {getAllPosts} from '~/utils/posts.server'
 import {ServerError} from '~/components/errors'
-import type {PostItem} from '~/types'
-import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+import type {GitHubRepo, PostItem} from '~/types'
 
 type LoaderData = {
   posts: PostItem[]
+  contributedRepos: GitHubRepo[]
 }
 
 export const loader: LoaderFunction = async ({request}) => {
   const timings: Timings = {}
 
-  const posts = await getAllPosts({
-    limit: 3,
-    request,
-    timings,
-  })
+  const [posts, contributedRepos] = await Promise.all([
+    getAllPosts({
+      limit: 3,
+      request,
+      timings,
+    }),
+    getGithubContributions({
+      request,
+      timings,
+    }),
+  ])
 
-  const data: LoaderData = {posts}
+  const data: LoaderData = {posts, contributedRepos}
   return json(data, {
     headers: {
       'Server-Timing': getServerTimeHeader(timings),
@@ -38,7 +48,7 @@ const gradients = [
 ]
 
 export default function IndexRoute() {
-  const {posts} = useLoaderData<LoaderData>()
+  const {posts, contributedRepos} = useLoaderData<LoaderData>()
 
   return (
     <ResponsiveContainer>
@@ -55,13 +65,38 @@ export default function IndexRoute() {
       </div>
       <Link
         to="/blog"
-        className="flex items-center mt-8 h-6 leading-7 rounded-lg transition-all"
+        className="flex items-center mb-8 mt-8 h-6 leading-7 rounded-lg transition-all"
       >
         Read all posts
         <span role="img" aria-label="read-all-posts" className="ml-2 text-2xl">
           👉
         </span>
       </Link>
+
+      {contributedRepos.length > 0 ? (
+        <>
+          <H2 className="mb-5 tracking-tight">GitHub Contributions</H2>
+          <ul>
+            {contributedRepos.map((repo: GitHubRepo) => (
+              <GithubRepoCard key={repo.id} repo={repo} />
+            ))}
+          </ul>
+          <Link
+            external
+            to="https://github.com/abereghici?tab=repositories"
+            className="flex items-center mb-8 mt-8 h-6 leading-7 rounded-lg transition-all"
+          >
+            View more on <span className="ml-1 font-semibold">GitHub</span>
+            <span
+              role="img"
+              aria-label="read-all-posts"
+              className="ml-2 text-2xl"
+            >
+              👉
+            </span>
+          </Link>
+        </>
+      ) : null}
     </ResponsiveContainer>
   )
 }

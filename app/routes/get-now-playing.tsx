@@ -15,7 +15,5 @@ export const loader: LoaderFunction = async () => {
     console.error(e)
   }
 
-  return json({
-    song,
-  })
+  return json({song})
 }

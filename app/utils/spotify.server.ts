@@ -47,6 +47,7 @@ async function getNowPlaying() {
           albumImageUrl: data.item?.album?.images?.[0]?.url,
         } as NowPlayingSong),
     )
+    .catch(() => null)
 }
 
 async function getTopTracks() {

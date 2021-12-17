@@ -1,5 +1,5 @@
 import type {LoaderFunction} from 'remix'
-import {getAllPosts} from '~/utils/posts.server'
+import {getAllPosts} from '~/utils/blog.server'
 
 export const loader: LoaderFunction = async ({request}) => {
   const host =

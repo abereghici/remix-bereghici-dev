@@ -8,21 +8,12 @@ import {
   downloadDirList,
   downloadMdxFileOrDirectory,
 } from '~/utils/github.server'
-import {cachified} from '~/utils/cache.server'
+import {cachified, CachifiedOptions} from '~/utils/cache.server'
 import {getSocialMetas} from '~/utils/seo'
 
 import type {LoaderData as RootLoaderData} from '../root'
 
 import type {GitHubFile, MdxListItem, MdxPage} from '~/types'
-import type {Timings} from './metrics.server'
-
-type CachifiedOptions = {
-  forceFresh?: boolean | string
-  request?: Request
-  maxAge?: number
-  expires?: Date
-  timings?: Timings
-}
 
 const defaultMaxAge = 1000 * 60 * 60 * 24 * 30
 

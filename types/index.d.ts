@@ -15,6 +15,16 @@ export type NowPlayingSong = {
 
 type GitHubFile = {path: string; content: string}
 
+type GitHubRepo = {
+  id: string
+  name: string
+  url: string
+  description: string
+  owner: {
+    login: string
+  }
+}
+
 type MdxPage = {
   code: string
   slug: string
@@ -89,6 +99,7 @@ type AppHandle = {
 
 export {
   GitHubFile,
+  GitHubRepo,
   AppLoader,
   AppAction,
   MdxPage,
