@@ -6,7 +6,7 @@
   "sideEffects": false,
   "scripts": {
     "prebuild": "npm run clean && echo All clean ✨",
-    "build": "npm run build:css:prod && npm run build:remix && npm run build:server",
+    "build": "npm run build:css:prod && npm run build:remix && npm run build:server && node ./other/generate-build-info",
     "build:css": "postcss styles/**/*.css --base styles --dir app/styles",
     "build:css:prod": "npm run build:css -- --env production",
     "build:remix": "cross-env NODE_ENV=production dotenv -e .env remix build --sourcemap",

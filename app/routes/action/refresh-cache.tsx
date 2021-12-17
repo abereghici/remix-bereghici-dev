@@ -11,6 +11,8 @@ type Body =
   | {keys: Array<string>; commitSha?: string}
   | {contentPaths: Array<string>; commitSha?: string}
 
+export const commitShaKey = 'meta:last-refresh-commit-sha'
+
 export const handle: AppHandle = {
   getSitemapEntries: () => null,
 }
@@ -28,10 +30,21 @@ export const action: ActionFunction = async ({request}) => {
 
   const body = (await request.json()) as Body
 
+  function setShaInRedis() {
+    if (body.commitSha) {
+      void redisCache.set(
+        commitShaKey,
+        JSON.stringify({sha: body.commitSha, date: new Date()}),
+      )
+    }
+  }
+
   if ('keys' in body && Array.isArray(body.keys)) {
     for (const key of body.keys) {
       void redisCache.del(key)
     }
+
+    setShaInRedis()
 
     return json({
       message: 'Deleting redis cache keys',
@@ -65,6 +78,8 @@ export const action: ActionFunction = async ({request}) => {
     if (refreshingContentPaths.some(p => p.startsWith('pages'))) {
       void getMdxDirList('pages', {forceFresh: true})
     }
+
+    setShaInRedis()
 
     return json({
       message: 'Refreshing cache for content paths',

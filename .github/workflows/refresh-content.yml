@@ -1,0 +1,25 @@
+name: 🥬 Refresh Content
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  refresh:
+    name: 🥬 Refresh Content
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '50'
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+
+      - name: 🥬 Refresh Content
+        run: node ./other/refresh-changed-content.js ${{ github.sha }}
+        env:
+          REFRESH_CACHE_SECRET: ${{ secrets.REFRESH_CACHE_SECRET }}
