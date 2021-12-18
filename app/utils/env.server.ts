@@ -4,6 +4,7 @@ function getEnv() {
     NODE_ENV: process.env.NODE_ENV,
     PRIMARY_REGION: process.env.PRIMARY_REGION,
     GA_TRACKING_ID: process.env.GA_TRACKING_ID,
+    SENTRY_DSN: process.env.SENTRY_DSN,
   }
 }
 
