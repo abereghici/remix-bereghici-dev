@@ -1,28 +1,31 @@
 import * as React from 'react'
-import {useFetcher} from 'remix'
 import type {NowPlayingSong} from '~/types'
 
 const REFRESH_INTERVAL = 1000 * 60 * 3 // 3 minutes
 
 export default function NowPlaying() {
-  const getNowPlayingSong = useFetcher<{song: NowPlayingSong}>()
-
-  // TODO: remove this when getNowPlayingSong is memoized properly
-  const getNowPlayingSongRef = React.useRef(getNowPlayingSong)
-  React.useEffect(() => {
-    getNowPlayingSongRef.current = getNowPlayingSong
-  }, [getNowPlayingSong])
+  const [song, setSong] = React.useState<NowPlayingSong | null>(null)
+  const unmontedRef = React.useRef(false)
 
   React.useEffect(() => {
-    const getSong = () => getNowPlayingSongRef.current.load('/get-now-playing')
+    const getSong = () =>
+      fetch('/get-now-playing')
+        .then(res => res.json())
+        .then(data => {
+          if (unmontedRef.current) {
+            return
+          }
+          setSong(data.song)
+        })
 
-    getSong()
+    void getSong()
 
     const intervalId = setInterval(getSong, REFRESH_INTERVAL)
-    return () => clearInterval(intervalId)
+    return () => {
+      unmontedRef.current = true
+      clearInterval(intervalId)
+    }
   }, [])
-
-  const song = getNowPlayingSong.data?.song
 
   return (
     <div className="flex flex-row-reverse items-center mb-8 w-full space-x-0 sm:flex-row sm:space-x-2">

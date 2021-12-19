@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {useTheme, Theme} from '~/utils/theme-provider'
+import {useTheme, Theme} from 'remix-themes'
 
 export const useLoaded = () => {
   const [loaded, setLoaded] = React.useState(false)

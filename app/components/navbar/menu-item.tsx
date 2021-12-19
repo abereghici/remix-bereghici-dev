@@ -13,7 +13,6 @@ export default function MenuItem({
   return (
     <li className="w-full dark:text-gray-100 text-gray-900 text-sm font-semibold border-b border-gray-200 dark:border-gray-600">
       <Link
-        prefetch="intent"
         className={clsx(
           'dark:hover:bg-gray-800 flex p-6 w-auto hover:bg-gray-200',
           {

@@ -3,7 +3,6 @@ import clsx from 'clsx'
 import errorStack from 'error-stack-parser'
 import ResponsiveContainer from './responsive-container'
 import {H1, H2, H5, H6, Paragraph} from './typography'
-import {getEnv} from '~/utils/env.server'
 
 function RedBox({error}: {error: Error}) {
   const [isVisible, setIsVisible] = React.useState(true)
@@ -55,7 +54,6 @@ function ErrorPage({
   errorCode: string
   message: string
 }) {
-  const ENV = getEnv()
   return (
     <ResponsiveContainer className="mb-20 mt-20 text-center">
       <H1 className="mb-4">{errorCode}</H1>
@@ -67,7 +65,10 @@ function ErrorPage({
         </Paragraph>
       ) : null}
 
-      {error && ENV.NODE_ENV === 'development' ? (
+      {error &&
+      (typeof window === 'undefined'
+        ? process.env.NODE_ENV === 'development'
+        : window.ENV.NODE_ENV === 'development') ? (
         <RedBox error={error} />
       ) : null}
     </ResponsiveContainer>

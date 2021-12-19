@@ -14,16 +14,17 @@ import {
 } from 'remix'
 import type {LinksFunction} from 'remix'
 import {
-  useTheme,
   ThemeProvider,
-  NonFlashOfWrongThemeEls,
+  useTheme,
+  PreventFlashOnWrongTheme,
   Theme,
-} from '~/utils/theme-provider'
-import {getThemeSession} from '~/utils/theme.server'
+} from 'remix-themes'
+
 import {getDomainUrl, getDisplayUrl} from '~/utils/misc'
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
 import {getSocialMetas} from './utils/seo'
 import {getEnv} from '~/utils/env.server'
+import {themeSessionResolver} from './utils/theme.server'
 import {pathedRoutes} from '~/other-routes.server'
 import Navbar from '~/components/navbar'
 import Footer from '~/components/footer'
@@ -95,7 +96,7 @@ export const loader: LoaderFunction = async ({request}) => {
   }
 
   const timings: Timings = {}
-  const themeSession = await getThemeSession(request)
+  const {getTheme} = await themeSessionResolver(request)
 
   const data: LoaderData = {
     ENV: getEnv(),
@@ -103,7 +104,7 @@ export const loader: LoaderFunction = async ({request}) => {
       origin: getDomainUrl(request),
       path: new URL(request.url).pathname,
       session: {
-        theme: themeSession.getTheme(),
+        theme: getTheme(),
       },
     },
   }
@@ -123,7 +124,7 @@ function App() {
       <head>
         <meta charSet="utf-8" />
         <Meta />
-        <NonFlashOfWrongThemeEls
+        <PreventFlashOnWrongTheme
           ssrTheme={Boolean(data.requestInfo.session.theme)}
         />
         <Links />
@@ -159,7 +160,7 @@ function App() {
       `,
           }}
         />
-        {data.ENV.NODE_ENV === 'development' ? <LiveReload /> : null}
+        {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>
     </html>
   )
@@ -169,7 +170,10 @@ export default function AppWithProviders() {
   const data = useLoaderData<LoaderData>()
 
   return (
-    <ThemeProvider specifiedTheme={data.requestInfo.session.theme}>
+    <ThemeProvider
+      specifiedTheme={data.requestInfo.session.theme}
+      themeAction="action/set-theme"
+    >
       <App />
     </ThemeProvider>
   )
