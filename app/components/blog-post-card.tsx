@@ -15,6 +15,7 @@ export default function BlogPostCard({
   const {title, description} = frontmatter
   return (
     <Link
+      prefetch="intent"
       to={`/blog/${slug}`}
       className={clsx(
         'hover:scale-[1.01] transform transition-all',

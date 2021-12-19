@@ -6,6 +6,7 @@ export default function NavigationLink(props: Parameters<typeof NavLink>['0']) {
   return (
     <li>
       <NavLink
+        prefetch="intent"
         className={({isActive}) =>
           clsx(
             'dark:hover:bg-gray-800 hidden p-1 hover:bg-gray-200 rounded-lg sm:px-3 sm:py-2 md:inline-block',

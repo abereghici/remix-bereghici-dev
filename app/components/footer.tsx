@@ -13,10 +13,14 @@ export default function Footer() {
       <div className="grid gap-4 grid-cols-1 pb-16 w-full sm:grid-cols-3">
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col space-y-6">
-            <Link to="/">Home</Link>
+            <Link to="/" prefetch="intent">
+              Home
+            </Link>
           </div>
           <div className="flex flex-col space-y-6">
-            <Link to="/blog">Blog</Link>
+            <Link to="/blog" prefetch="intent">
+              Blog
+            </Link>
           </div>
         </div>
         <div className="flex flex-col space-y-4">
