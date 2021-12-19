@@ -50,7 +50,7 @@ export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
   }
 
   if (!post) {
-    throw json(null, {status: 404, headers})
+    throw new Response('Not Found', {status: 404, headers})
   }
 
   const viewId = Number(post.views.id)
