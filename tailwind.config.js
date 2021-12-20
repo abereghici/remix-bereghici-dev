@@ -3,9 +3,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 const fromRoot = p => path.join(__dirname, p)
 
 module.exports = {
-  mode: 'jit',
   darkMode: 'class',
-  variants: {},
   theme: {
     colors: {
       transparent: 'transparent',
@@ -133,6 +131,6 @@ module.exports = {
       }),
     },
   },
-  purge: [fromRoot('./app/**/*.+(js|ts|tsx|mdx|md)')],
+  content: [fromRoot('./app/**/*.+(js|ts|tsx|mdx|md)')],
   plugins: [require('@tailwindcss/typography')],
 }
