@@ -19,7 +19,6 @@ import {
   PreventFlashOnWrongTheme,
   Theme,
 } from 'remix-themes'
-
 import {getDomainUrl, getDisplayUrl} from '~/utils/misc'
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
 import {getSocialMetas} from './utils/seo'
@@ -138,7 +137,6 @@ function App() {
         </main>
         <Footer />
         <ScrollRestoration />
-        <Scripts />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(data.ENV)};`,
@@ -160,6 +158,7 @@ function App() {
       `,
           }}
         />
+        <Scripts />
         {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>
     </html>
