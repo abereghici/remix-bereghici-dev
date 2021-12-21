@@ -238,6 +238,7 @@ function Image({
   imgProps: JSX.IntrinsicElements['img']
 }) {
   return (
+    // eslint-disable-next-line jsx-a11y/alt-text
     <img
       className="my-8 w-full rounded-lg object-cover"
       {...getImgProps(getImageBuilder(cloudinaryId, imgProps.alt), {
