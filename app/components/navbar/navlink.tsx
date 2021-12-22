@@ -2,7 +2,10 @@ import * as React from 'react'
 import {NavLink} from 'remix'
 import clsx from 'clsx'
 
-export default function NavigationLink({children, ...rest}: Parameters<typeof NavLink>['0']) {
+export default function NavigationLink({
+  children,
+  ...rest
+}: Parameters<typeof NavLink>['0']) {
   return (
     <li>
       <NavLink
@@ -17,7 +20,9 @@ export default function NavigationLink({children, ...rest}: Parameters<typeof Na
           )
         }
         {...rest}
-      >{children}</NavLink>
+      >
+        {children}
+      </NavLink>
     </li>
   )
 }

@@ -1,6 +1,8 @@
 module.exports = {
   extends: [
-    "@remix-run/eslint-config", "@remix-run/eslint-config/jest"
+    '@remix-run/eslint-config',
+    '@remix-run/eslint-config/jest',
+    'plugin:prettier/recommended',
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,
