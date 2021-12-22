@@ -2,13 +2,18 @@ import * as React from 'react'
 import ResponsiveContainer from './responsive-container'
 import Link from './link'
 import NowPlaying from './now-playing'
+import type {SpotifySong} from '~/types'
 
-export default function Footer() {
+export default function Footer({
+  nowPlayingSong,
+}: {
+  nowPlayingSong: SpotifySong | null
+}) {
   return (
     <ResponsiveContainer as="footer">
       <hr className="border-1 mb-8 mt-8 w-full border-gray-200 dark:border-gray-800" />
 
-      <NowPlaying />
+      <NowPlaying song={nowPlayingSong} />
 
       <div className="grid gap-4 grid-cols-1 pb-16 w-full sm:grid-cols-3">
         <div className="flex flex-col space-y-4">

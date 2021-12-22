@@ -187,11 +187,11 @@ interface RepoResponseData {
  * @returns a promise that resolves to an array of GitHubRepo repositories that the user has contributed to
  */
 async function getRepositoriesContributedTo() {
-  const limit = 50
+  const limit = 100
   const query = `
   query repositoriesContributedTo($username: String! $limit: Int!) {
     user (login: $username) {
-      repositoriesContributedTo(last: $limit, privacy: PUBLIC, includeUserRepositories: true, contributionTypes: [COMMIT, PULL_REQUEST, REPOSITORY]) {
+      repositoriesContributedTo(last: $limit, privacy: PUBLIC, includeUserRepositories: false, contributionTypes: [COMMIT, PULL_REQUEST, REPOSITORY]) {
         nodes {
           id
           name
@@ -211,9 +211,7 @@ async function getRepositoriesContributedTo() {
   })
 
   return {
-    contributedRepos: data.user.repositoriesContributedTo.nodes
-      .reverse()
-      .filter(repo => repo.owner.login !== 'abereghici'),
+    contributedRepos: data.user.repositoriesContributedTo.nodes,
   }
 }
 

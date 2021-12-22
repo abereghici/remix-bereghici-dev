@@ -4,11 +4,11 @@
 import type {ActionFunction, LoaderFunction} from 'remix'
 import calculateReadingTime from 'reading-time'
 
-export type NowPlayingSong = {
+export type SpotifySong = {
   album: string
   albumImageUrl: string
   artist: string
-  isPlaying: boolean
+  isPlaying?: boolean
   songUrl: string
   title: string
 }

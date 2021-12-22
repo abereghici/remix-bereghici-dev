@@ -1,4 +1,6 @@
-import type {NowPlayingSong} from '~/types'
+import type {SpotifySong} from '~/types'
+import {cachified, CachifiedOptions} from './cache.server'
+import {redisCache} from './redis.server'
 
 const client_id = process.env.SPOTIFY_CLIENT_ID
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET
@@ -45,7 +47,7 @@ async function getNowPlaying() {
             .join(', '),
           album: data.item?.album?.name,
           albumImageUrl: data.item?.album?.images?.[0]?.url,
-        } as NowPlayingSong),
+        } as SpotifySong),
     )
     .catch(() => null)
 }
@@ -58,6 +60,45 @@ async function getTopTracks() {
       Authorization: `Bearer ${access_token}`,
     },
   })
+    .then(data => data.json())
+    .then(data =>
+      data.items.map(
+        (songData: any) =>
+          ({
+            songUrl: songData.external_urls?.spotify,
+            title: songData.name,
+            artist: songData.artists
+              ?.map((artist: {name: string}) => artist.name)
+              .join(', '),
+            album: songData.album?.name,
+            albumImageUrl: songData.album?.images?.[0]?.url,
+          } as SpotifySong),
+      ),
+    )
+    .catch(() => [] as SpotifySong[])
 }
 
-export {getNowPlaying, getTopTracks}
+async function getTopTracksCached(options?: CachifiedOptions) {
+  const maxAge = 11000 * 60 * 60 * 4 // 4 hours
+
+  return cachified({
+    cache: redisCache,
+    maxAge,
+    ...options,
+    key: `spotify-top-tracks`,
+    checkValue: (value: unknown) => Array.isArray(value),
+    getFreshValue: async () => {
+      try {
+        const tracks = await getTopTracks()
+
+        return tracks
+      } catch (e: unknown) {
+        console.error(e)
+      }
+
+      return []
+    },
+  })
+}
+
+export {getNowPlaying, getTopTracksCached}

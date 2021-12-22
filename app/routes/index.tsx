@@ -3,12 +3,12 @@ import {json, LoaderFunction, useLoaderData} from 'remix'
 import {getAllPosts} from '~/utils/blog.server'
 
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
-import {getGithubContributions} from '~/utils/homepage.server'
+import {getFeaturedGithubContributions} from '~/utils/homepage.server'
 import GithubRepoCard from '~/components/github-repo-card'
 import ResponsiveContainer from '~/components/responsive-container'
 import Hero from '~/components/hero'
 import BlogPostCard from '~/components/blog-post-card'
-import {H2} from '~/components/typography'
+import {H2, H3, Paragraph, Title} from '~/components/typography'
 import Link from '~/components/link'
 import {ServerError} from '~/components/errors'
 import type {GitHubRepo, PostItem} from '~/types'
@@ -27,7 +27,7 @@ export const loader: LoaderFunction = async ({request}) => {
       request,
       timings,
     }),
-    getGithubContributions({
+    getFeaturedGithubContributions({
       request,
       timings,
     }),
@@ -82,11 +82,10 @@ export default function IndexRoute() {
             ))}
           </ul>
           <Link
-            external
-            to="https://github.com/abereghici?tab=repositories"
+            to="/github-activity"
             className="flex items-center mb-8 mt-8 h-6 leading-7 rounded-lg transition-all"
           >
-            View more on <span className="ml-1 font-semibold">GitHub</span>
+            View all activity
             <span
               role="img"
               aria-label="read-all-posts"

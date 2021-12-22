@@ -14,9 +14,11 @@ export default function GithubRepoCard({repo}: {repo: GitHubRepo}) {
       >
         <div className="text-blue-400 group-hover:underline group-focus-within:underline">
           <span className="text-blue-400">{owner.login}/</span>
-          <span className="text-blue-600 dark:text-blue-100">{name}</span>
+          <span className="text-blue-600 dark:text-blue-300">{name}</span>
         </div>
-        <Paragraph variant="secondary">{description}</Paragraph>
+        {description && (
+          <Paragraph variant="secondary">{description}</Paragraph>
+        )}
       </Link>
     </li>
   )

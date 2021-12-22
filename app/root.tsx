@@ -24,10 +24,12 @@ import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
 import {getSocialMetas} from './utils/seo'
 import {getEnv} from '~/utils/env.server'
 import {themeSessionResolver} from './utils/theme.server'
+import {getNowPlaying} from '~/utils/spotify.server'
 import {pathedRoutes} from '~/other-routes.server'
 import Navbar from '~/components/navbar'
 import Footer from '~/components/footer'
 import {FourOhFour, ServerError} from '~/components/errors'
+import type {SpotifySong} from '~/types'
 
 import tailwindStyles from './styles/tailwind.css'
 import proseStyles from './styles/prose.css'
@@ -78,6 +80,7 @@ export const meta: MetaFunction = ({data}) => {
 
 export type LoaderData = {
   ENV: ReturnType<typeof getEnv>
+  nowPlayingSong: SpotifySong | null
   requestInfo: {
     origin: string
     path: string
@@ -96,9 +99,11 @@ export const loader: LoaderFunction = async ({request}) => {
 
   const timings: Timings = {}
   const {getTheme} = await themeSessionResolver(request)
+  const nowPlayingSong = await getNowPlaying()
 
   const data: LoaderData = {
     ENV: getEnv(),
+    nowPlayingSong,
     requestInfo: {
       origin: getDomainUrl(request),
       path: new URL(request.url).pathname,
@@ -135,7 +140,7 @@ function App() {
         <main id="main">
           <Outlet />
         </main>
-        <Footer />
+        <Footer nowPlayingSong={data.nowPlayingSong} />
         <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{
