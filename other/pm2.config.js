@@ -6,6 +6,7 @@ module.exports = {
         'node',
         '--inspect',
         '--require ./node_modules/dotenv/config',
+        '--require ./mocks',
         './index.js',
       ]
         .filter(Boolean)

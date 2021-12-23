@@ -2,5 +2,10 @@
   "files": [],
   "exclude": ["node_modules"],
   "extends": "./other/shared-tsconfig.json",
-  "references": [{"path": "types"}, {"path": "app"}, {"path": "server"}]
+  "references": [
+    {"path": "types"},
+    {"path": "app"},
+    {"path": "server"},
+    {"path": "mocks"}
+  ]
 }
