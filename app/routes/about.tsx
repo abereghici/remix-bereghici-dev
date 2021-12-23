@@ -21,7 +21,7 @@ export const loader: LoaderFunction = async ({request}) => {
       slug: 'about',
       contentDir: 'pages',
     },
-    {request, timings, forceFresh: true},
+    {request, timings},
   )
 
   if (!page) {
