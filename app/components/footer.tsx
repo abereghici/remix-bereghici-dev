@@ -27,6 +27,11 @@ export default function Footer({
               Blog
             </Link>
           </div>
+          <div className="flex flex-col space-y-6">
+            <Link to="/about" prefetch="intent">
+              About
+            </Link>
+          </div>
         </div>
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col space-y-6">

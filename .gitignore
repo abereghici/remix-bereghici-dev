@@ -16,3 +16,5 @@ other/postcss.ignored
 .env
 .env.production
 .envrc
+
+*.ignored.*
