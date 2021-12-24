@@ -251,8 +251,17 @@ function Image({
   )
 }
 
+function Link({children, ...rest}: JSX.IntrinsicElements['a']) {
+  return (
+    <a target="_blank" rel="noopener noreferrer nofollow" {...rest}>
+      {children}
+    </a>
+  )
+}
+
 const mdxComponents = {
   Image,
+  a: Link,
 }
 
 function getMdxComponent(code: string) {
