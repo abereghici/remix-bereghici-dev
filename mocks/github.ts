@@ -161,7 +161,7 @@ const githubHandlers: Array<RestHandler<MockedRequest<DefaultRequestBody>>> = [
     },
   ),
   rest.get(
-    `https://api.github.com/repos/:owner/:repo/content/:path*`,
+    `https://api.github.com/repos/:owner/:repo/contents/:path*`,
     async (req, res, ctx) => {
       const {owner, repo} = req.params
 
