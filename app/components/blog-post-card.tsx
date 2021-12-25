@@ -18,7 +18,7 @@ export default function BlogPostCard({
       prefetch="intent"
       to={`/blog/${slug}`}
       className={clsx(
-        'hover:scale-[1.01] transform transition-all',
+        'hover:scale-[1.01] transform transition-all will-change-transform',
         'p-1 w-full bg-gradient-to-r rounded-xl',
         gradient,
       )}

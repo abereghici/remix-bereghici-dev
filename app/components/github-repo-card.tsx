@@ -10,10 +10,12 @@ export default function GithubRepoCard({repo}: {repo: GitHubRepo}) {
       <Link
         to={repo.url}
         external
-        className="group hover:scale-[1.01] block -mx-4 my-4 p-4 rounded-md"
+        className="group hover:scale-[1.01] block -mx-4 my-4 p-4 rounded-md will-change-transform"
       >
         <div className="text-blue-400 group-hover:underline group-focus-within:underline">
-          <span className="text-blue-400">{owner.login}/</span>
+          <span className="text-blue-600 dark:text-blue-300">
+            {owner.login}/
+          </span>
           <span className="text-blue-600 dark:text-blue-300">{name}</span>
         </div>
         {description && (

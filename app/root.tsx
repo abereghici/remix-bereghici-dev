@@ -148,9 +148,11 @@ function App() {
           }}
         />
         <script
+          defer
           src={`https://www.googletagmanager.com/gtag/js?id=${data.ENV.GA_TRACKING_ID}`}
         />
         <script
+          defer
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer = window.dataLayer || [];
       function gtag() {
