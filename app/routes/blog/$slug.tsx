@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {json, LinksFunction, useCatch, useLoaderData} from 'remix'
+import {json, LinksFunction, useCatch, useFetcher, useLoaderData} from 'remix'
 import parseISO from 'date-fns/parseISO'
 import format from 'date-fns/format'
 import {mdxPageMeta, useMdxComponent, getBlogMdxListItems} from '~/utils/mdx'
@@ -7,10 +7,11 @@ import {getPost, addPostRead} from '~/utils/blog.server'
 import ResponsiveContainer from '~/components/responsive-container'
 import {H1, Paragraph} from '~/components/typography'
 import {FourOhFour, ServerError} from '~/components/errors'
-import type {AppHandle, AppLoader, Post} from '~/types'
+import type {AppAction, AppHandle, AppLoader, Post} from '~/types'
 
 import codeHighlightStyles from '~/styles/code-highlight.css'
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+import useOnRead from '~/components/use-on-read'
 
 export const links: LinksFunction = () => {
   return [{rel: 'stylesheet', href: codeHighlightStyles}]
@@ -35,6 +36,24 @@ export const handle: AppHandle = {
   },
 }
 
+export const action: AppAction<{slug: string}> = async ({request, params}) => {
+  const {slug} = params
+
+  const post = await getPost({
+    slug,
+    request,
+  })
+
+  if (!post) {
+    return json({success: false})
+  }
+
+  const viewId = Number(post.views.id)
+  await addPostRead(isNaN(viewId) ? 0 : viewId, slug)
+
+  return json({success: true})
+}
+
 export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
   const timings: Timings = {}
 
@@ -53,9 +72,6 @@ export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
     throw new Response('Not Found', {status: 404, headers})
   }
 
-  const viewId = Number(post.views.id)
-  void addPostRead(isNaN(viewId) ? 0 : viewId, slug)
-
   const data: LoaderData = {page: post}
 
   return json(data, {
@@ -66,9 +82,26 @@ export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
 export default function FullArticle() {
   const {page} = useLoaderData<LoaderData>()
   const {frontmatter, readTime, code, views} = page
-  const {title, date} = frontmatter
+  const {title, date, draft} = frontmatter
 
   const Component = useMdxComponent(code)
+
+  const readMarker = React.useRef<HTMLDivElement>(null)
+
+  const markAsRead = useFetcher()
+  const markAsReadRef = React.useRef(markAsRead)
+  React.useEffect(() => {
+    markAsReadRef.current = markAsRead
+  }, [markAsRead])
+
+  useOnRead({
+    parentElRef: readMarker,
+    time: readTime?.time,
+    onRead: React.useCallback(() => {
+      if (draft) return
+      markAsReadRef.current.submit({}, {method: 'post'})
+    }, [draft]),
+  })
 
   return (
     <ResponsiveContainer>
@@ -96,7 +129,7 @@ export default function FullArticle() {
           {views.count} views
         </Paragraph>
       </div>
-      <div className="prose dark:prose-dark mt-9">
+      <div ref={readMarker} className="prose dark:prose-dark mt-9">
         <Component />
       </div>
     </ResponsiveContainer>

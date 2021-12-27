@@ -93,7 +93,7 @@ async function getTopTracksCached(options?: CachifiedOptions) {
 
         return tracks
       } catch (e: unknown) {
-        console.error(e)
+        console.warn(e)
       }
 
       return []

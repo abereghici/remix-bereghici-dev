@@ -87,7 +87,7 @@ async function addPostRead(viewId: number | bigint, slug: string) {
       })
     }
   } catch (error: unknown) {
-    console.log(error)
+    console.error(error)
   }
 }
 
