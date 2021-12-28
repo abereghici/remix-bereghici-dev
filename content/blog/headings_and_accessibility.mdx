@@ -1,0 +1,121 @@
+---
+title: Headings & Accessibility
+description:
+  How to use headings in web pages to help users get a sense of the page’s
+  organization and structure without breaking accessibility.
+date: 2021-12-28
+categories:
+  - development
+  - react
+  - accessibility
+meta:
+  keywords:
+    - react
+    - accessibility
+    - headings
+    - web
+bannerCloudinaryId: bereghici-dev/blog/heading_accessibility_v31ihj
+---
+
+<Image
+  cloudinaryId="bereghici-dev/blog/heading_accessibility_v31ihj"
+  imgProps={{alt: 'Headings & Accessibility'}}
+/>
+
+Headings are used to organize content in a web page by separating it into
+meaningful sections. Well-written headings help users to scan quickly through
+the page and get a sense of whether the page contains the information they are
+looking for. Headings are critical for accessibility, the adaptive technology
+users rely on formatted headings to understand and navigate through the page.
+Without a good heading, the screen reader software read the entire content as a
+single section.
+
+Generally, it's considered bad practice to skip heading levels, for example
+having a `<h4>` without a `<h3>`. You can not only confuse screen readers but
+all readers when you don't follow a consistent pattern for your content.
+
+From practice, I've noticed that the developers are using the wrong element just
+because of style. You should NOT use different heading tags just for styling
+purposes.
+
+Also, in React it's very easy to end up with a wrong structure, especially when
+you move components with headings around. You have to check the levels if still
+make sense and adjust them if needed, so most of the time developers ends up
+with using only a `<h1>` element or with a wrong structure.
+
+A very interesting solution for this problem I found in
+[baseweb](https://github.com/uber/baseweb), a component library created by
+**Uber.**
+
+Instead of worring about what element you have to use, you can have a React
+Context that handles the document outline algorithm for you. Here is the
+`HeadingLevel` component that's used to track the heading levels.
+
+```jsx
+export const HeadingLevel = ({children}: Props) => {
+  const level = React.useContext(LevelContext)
+
+  return (
+    <LevelContext.Provider value={level + 1}>{children}</LevelContext.Provider>
+  )
+}
+```
+
+Now the `Heading` component can consume the level and render the correct
+element. It contains validations to make sure you cannot have more than 6 levels
+deep. Also, it solves the styling problem. If you need to have a `<h2>` element
+but styled as a `<h4>`, you can use the `styleLevel` prop to specify it.
+
+```jsx
+import { LevelContext } from "./heading-level";
+
+interface Props {
+  styleLevel?: number;
+  children: React.ReactNode;
+}
+
+const STYLES = ["", "h1", "h2", "h3", "h4", "h5", "h6"];
+
+const Heading = ({ styleLevel, children }: Props) => {
+  const level = React.useContext(LevelContext);
+
+  if (level === 0) {
+    throw new Error(
+      "Heading component must be a descendant of HeadingLevel component."
+    );
+  }
+  if (level > 6) {
+    throw new Error(
+      `HeadingLevel cannot be nested ${level} times. The maximum is 6 levels.`
+    );
+  }
+
+  if (typeof styleLevel !== "undefined" && (styleLevel < 1 || styleLevel > 6)) {
+    throw new Error(`styleLevel = ${styleLevel} is out of 1-6 range.`);
+  }
+
+  const Element = `h${level}` as React.ElementType;
+
+  const classes = styleLevel ? STYLES[styleLevel] : STYLES[level];
+
+  return <Element className={classes}>{children}</Element>;
+};
+```
+
+It might look a bit verbose, but now you don't have to worry about what element
+you should use, you just care about the levels. If you want to play around with
+this solution, you can use the sandbox below.
+
+<iframe
+  src="https://codesandbox.io/embed/headings-accessibility-cf90z?autoresize=1&fontsize=12&hidenavigation=1&theme=dark&view=editor"
+  style={{
+    width: '100%',
+    height: '500px',
+    border: 0,
+    borderRadius: '4px',
+    overflow: 'hidden',
+  }}
+  title="headings-accessibility"
+  allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+  sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+></iframe>

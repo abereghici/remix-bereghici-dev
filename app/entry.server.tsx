@@ -35,6 +35,7 @@ export default async function handleRequest(
   worker-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googletagmanager.com;
   child-src 'self';
+  frame-src 'self' codesandbox.io;
   style-src 'self' 'unsafe-inline' ;
   img-src * blob: data:;
   media-src 'none';
