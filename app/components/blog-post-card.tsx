@@ -27,7 +27,7 @@ export default function BlogPostCard({
         <Title as="h3" size="h6" className="mb-2 w-full tracking-tight">
           {title}
         </Title>
-        <Paragraph size="small" variant="secondary" className="mb-6 sm:mb-10">
+        <Paragraph size="small" variant="secondary" className="mb-4 sm:mb-6">
           {description}
         </Paragraph>
         <div className="text-secondary capsize flex items-center">

@@ -8,4 +8,5 @@
     "pathed",
     "tailwindcss"
   ],
+  "svn.ignoreMissingSvnWarning": true,
 }
