@@ -1,7 +1,15 @@
 import * as nodePath from 'path'
 import {promises as fs} from 'fs'
-import type {DefaultRequestBody, MockedRequest, RestHandler} from 'msw'
-import {rest} from 'msw'
+import type {
+  DefaultRequestBody,
+  GraphQLHandler,
+  GraphQLRequest,
+  MockedRequest,
+  RestHandler,
+} from 'msw'
+import {rest, graphql} from 'msw'
+
+import type {GitHubRepo} from '../types'
 
 async function isDirectory(d: string) {
   try {
@@ -44,7 +52,10 @@ type GHContent = {
   encoding: 'base64'
 }
 
-const githubHandlers: Array<RestHandler<MockedRequest<DefaultRequestBody>>> = [
+const githubHandlers: Array<
+  | RestHandler<MockedRequest<DefaultRequestBody>>
+  | GraphQLHandler<GraphQLRequest<any>>
+> = [
   rest.get(
     `https://api.github.com/repos/:owner/:repo/contents/:path`,
     async (req, res, ctx) => {
@@ -187,6 +198,62 @@ const githubHandlers: Array<RestHandler<MockedRequest<DefaultRequestBody>>> = [
       return res(ctx.json(resource))
     },
   ),
+  graphql.query(`repositoriesContributedTo`, (req, res, ctx) => {
+    const resource: {
+      user: {
+        repositoriesContributedTo: {nodes: GitHubRepo[]}
+      }
+    } = {
+      user: {
+        repositoriesContributedTo: {
+          nodes: [
+            {
+              id: 'MDEwOlJlcG9zaXRvcnk2NzIzNjQ2MQ==',
+              name: 'csstree',
+              url: 'https://github.com/csstree/csstree',
+              description:
+                'A tool set for CSS including fast detailed parser, walker, generator and lexer based on W3C specs and browser implementations',
+              owner: {
+                login: 'csstree',
+              },
+            },
+            {
+              id: 'MDEwOlJlcG9zaXRvcnkxOTg1MDg2MTA=',
+              name: 'paste',
+              url: 'https://github.com/twilio-labs/paste',
+              description:
+                'Paste is a design system for designing and building consistent experiences at Twilio.',
+              owner: {
+                login: 'twilio-labs',
+              },
+            },
+            {
+              id: 'MDEwOlJlcG9zaXRvcnkyMTkwODUyNjA=',
+              name: 'lighthouse-action',
+              url: 'https://github.com/justinribeiro/lighthouse-action',
+              description:
+                'Audit deployed web sites with my artisanal blend of WPT Network Emulation Profiles, Puppeteer, Chrome headless, Lighthouse, and Github Actions.',
+              owner: {
+                login: 'justinribeiro',
+              },
+            },
+            {
+              id: 'MDEwOlJlcG9zaXRvcnkzMDc0ODkyODQ=',
+              name: 'remix',
+              url: 'https://github.com/remix-run/remix',
+              description:
+                'Build Better Websites. Create modern, resilient user experiences with web fundamentals.',
+              owner: {
+                login: 'remix-run',
+              },
+            },
+          ],
+        },
+      },
+    }
+
+    return res(ctx.data(resource))
+  }),
 ]
 
 export {githubHandlers}

@@ -1,8 +1,9 @@
 import {setupServer} from 'msw/node'
 import {githubHandlers} from './github'
+import {spotifyHandlers} from './spotify'
 import {isE2E} from './utils'
 
-const server = setupServer(...githubHandlers)
+const server = setupServer(...githubHandlers, ...spotifyHandlers)
 
 server.listen({onUnhandledRequest: 'warn'})
 console.info('🔶 Mock server installed')

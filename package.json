@@ -76,7 +76,7 @@
     "rehype-slug": "^5.0.0",
     "remark-gfm": "^3.0.1",
     "remix": "1.1.1",
-    "remix-themes": "^1.1.3"
+    "remix-themes": "^1.1.4"
   },
   "devDependencies": {
     "@cld-apis/types": "^0.1.3",
