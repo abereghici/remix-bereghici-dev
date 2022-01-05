@@ -104,7 +104,63 @@ jobs:
 
       - name: 🃏 Run jest
         run: npm run test -- --coverage
+  cypress:
+    name: ⚫️ Cypress
+    needs: [changes]
+    if: needs.changes.outputs.DEPLOYABLE == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      # when one test fails, DO NOT cancel the other
+      # containers, because this will kill Cypress processes
+      # leaving the Dashboard hanging ...
+      # https://github.com/cypress-io/github-action/issues/48
+      fail-fast: false
+      matrix:
+        # run 3 copies of the current job in parallel
+        containers: ['🤠 Alex', '🤖 Alexandru', '🥷 Sasha']
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
 
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v2
+
+      - name: 🏄 Copy test env vars
+        run: cp .env.example .env
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: ⚙️ Build
+        run: npm run build
+        env:
+          ENABLE_TEST_ROUTES: 'true'
+          COMMIT_SHA: ${{ github.sha }}
+
+      - name: 🐳 Docker compose
+        run: docker-compose up -d
+
+      - name: 🌳 Cypress run
+        uses: cypress-io/github-action@v2
+        continue-on-error: true
+        with:
+          start: npm run start:mocks
+          wait-on: 'http://localhost:8811'
+          record: true
+          parallel: true
+          group: 'bereghici.dev'
+        env:
+          PORT: '8811'
+          RUNNING_E2E: 'true'
+          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+          REDIS_URL: ${{ secrets.REDIS_CI_TEST_URL }}
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          DISABLE_TELEMETRY: 'true'
   build:
     name: 🐳 Build
     needs: [changes]
