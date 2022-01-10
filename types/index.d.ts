@@ -3,6 +3,7 @@
 
 import type {ActionFunction, LoaderFunction} from 'remix'
 import calculateReadingTime from 'reading-time'
+import {GitHubProfile} from 'remix-auth-github'
 
 export type SpotifySong = {
   album: string
@@ -24,6 +25,8 @@ type GitHubRepo = {
     login: string
   }
 }
+
+type GithubUser = Pick<GitHubProfile, 'id' | 'displayName' | 'photos' | 'name'>
 
 type MdxPage = {
   code: string
@@ -100,6 +103,7 @@ type AppHandle = {
 export {
   GitHubFile,
   GitHubRepo,
+  GithubUser,
   AppLoader,
   AppAction,
   MdxPage,

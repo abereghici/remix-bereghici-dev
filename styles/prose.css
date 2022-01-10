@@ -17,6 +17,7 @@
 
 .prose a {
   @apply transition-all;
+  word-break: break-word;
 }
 
 .prose .anchor:after {

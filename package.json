@@ -68,6 +68,7 @@
     "prisma": "^3.6.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-textarea-autosize": "^8.3.3",
     "reading-time": "^1.5.0",
     "redis": "^3.1.2",
     "rehype-autolink-headings": "^6.1.0",
@@ -76,6 +77,8 @@
     "rehype-slug": "^5.0.0",
     "remark-gfm": "^3.0.1",
     "remix": "1.1.1",
+    "remix-auth": "^3.2.1",
+    "remix-auth-github": "^1.0.0",
     "remix-themes": "^1.1.4"
   },
   "devDependencies": {

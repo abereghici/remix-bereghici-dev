@@ -178,7 +178,7 @@ export default function AppWithProviders() {
   return (
     <ThemeProvider
       specifiedTheme={data.requestInfo.session.theme}
-      themeAction="action/set-theme"
+      themeAction="/action/set-theme"
     >
       <App />
     </ThemeProvider>
