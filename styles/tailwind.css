@@ -42,4 +42,8 @@
   .text-inverse {
     @apply dark:text-black text-white;
   }
+
+  .text-danger {
+    @apply text-red-500;
+  }
 }

@@ -25,7 +25,10 @@ export const meta = mdxPageMeta
 
 type LoaderData = {
   page: Post
-  user: GithubUser | null
+  auth: {
+    user: GithubUser | null
+    error: string | null
+  }
 }
 
 const handleId = 'blog-post'
@@ -62,15 +65,51 @@ const authenticate = async (request: Request) => {
   session.set('redirectUrl', request.url)
 
   request.headers.set('Cookie', await commitSession(session))
-  return authenticator.authenticate('github', request)
+  return await authenticator.authenticate('github', request)
 }
 
-const logout = async (request: Request) => {
-  await authenticator.logout(request, {redirectTo: request.url})
+const createComment = async (
+  slug: string,
+  formData: FormData,
+  request: Request,
+) => {
+  const user = await authenticator.isAuthenticated(request)
+
+  if (!user) {
+    return json(
+      {
+        error: 'You must be logged in to post a comment.',
+      },
+      401,
+    )
+  }
+
+  const body = formData.get('body') ?? ''
+
+  if (typeof body !== 'string' || !body.trim().length) {
+    return json(
+      {
+        error: 'The comment body cannot be empty.',
+      },
+      400,
+    )
+  }
+
+  const comment = {
+    body,
+    slug,
+    createdBy: user?.displayName,
+    avatarUrl: user?.photos?.[0]?.value,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+
+  return json({success: true})
 }
 
 export const action: AppAction<{slug: string}> = async ({request, params}) => {
-  const type = (await request.formData()).get('actionType')
+  const formData = await request.formData()
+  const type = formData.get('actionType')
 
   switch (type) {
     case 'markRead': {
@@ -79,20 +118,26 @@ export const action: AppAction<{slug: string}> = async ({request, params}) => {
     case 'authenticate': {
       return authenticate(request)
     }
-
-    case 'logout': {
-      return logout(request)
+    case 'createComment': {
+      return createComment(params.slug, formData, request)
     }
-
     default:
-      throw new Error('Unknown action type')
+      break
   }
 }
 
 export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
   const timings: Timings = {}
 
-  let user = await authenticator.isAuthenticated(request)
+  let session = await getSession(request)
+  const auth = {
+    user: await authenticator.isAuthenticated(request),
+    error: await session.get(authenticator.sessionErrorKey),
+  }
+
+  if (auth.error) {
+    session.set(authenticator.sessionErrorKey, null)
+  }
 
   const {slug} = params
   const post = await getPost({
@@ -103,13 +148,17 @@ export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
 
   const headers = {
     'Server-Timing': getServerTimeHeader(timings),
+    'Set-Cookie': await commitSession(session),
   }
 
   if (!post) {
     throw new Response('Not Found', {status: 404, headers})
   }
 
-  const data: LoaderData = {page: post, user}
+  const data: LoaderData = {
+    page: post,
+    auth,
+  }
 
   return json(data, {
     headers,
@@ -117,32 +166,23 @@ export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
 }
 
 export default function FullArticle() {
-  const {page, user} = useLoaderData<LoaderData>()
+  const {page, auth} = useLoaderData<LoaderData>()
   const {frontmatter, readTime, code, views} = page
   const {title, date, draft} = frontmatter
 
   const Component = useMdxComponent(code)
 
   const readMarker = React.useRef<HTMLDivElement>(null)
-
-  const fetcher = useFetcher()
-  const fetcherRef = React.useRef(fetcher)
-  React.useEffect(() => {
-    fetcherRef.current = fetcher
-  }, [fetcher])
+  const markRead = useFetcher()
 
   useOnRead({
     parentElRef: readMarker,
     time: readTime?.time,
     onRead: React.useCallback(() => {
       if (draft) return
-      fetcherRef.current.submit({actionType: 'markRead'}, {method: 'post'})
-    }, [draft]),
+      markRead.submit({actionType: 'markRead'}, {method: 'post'})
+    }, [draft, markRead]),
   })
-
-  const authenticate = React.useCallback(() => {
-    fetcherRef.current.submit({actionType: 'authenticate'}, {method: 'post'})
-  }, [])
 
   return (
     <ResponsiveContainer>
@@ -174,13 +214,14 @@ export default function FullArticle() {
         <Component />
       </div>
       <H2 className="my-4 tracking-tight">Discussion</H2>
-      {user ? (
-        <BlogPostCommentInput action="/" />
+      {auth.user ? (
+        <BlogPostCommentInput />
       ) : (
-        <BlogPostCommentAuthenticate onLogin={authenticate} />
+        <BlogPostCommentAuthenticate error={auth.error} />
       )}
+
       <BlogPostComment
-        user={user}
+        user={auth.user}
         comment={{
           slug: page.slug,
           body: "What a beautiful and useful website! I'm inspired by the Snippets section. I would like to build it for myself. 😁",
@@ -191,7 +232,7 @@ export default function FullArticle() {
         }}
       />
       <BlogPostComment
-        user={user}
+        user={auth.user}
         comment={{
           slug: page.slug,
           body: "What a beautiful and useful website! I'm inspired by the Snippets section. I would like to build it for myself. 😁",

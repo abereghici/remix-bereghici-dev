@@ -1,7 +1,7 @@
 import * as React from 'react'
 import clsx from 'clsx'
 
-type Variant = 'primary' | 'secondary' | 'inverse'
+type Variant = 'primary' | 'secondary' | 'inverse' | 'danger'
 
 type TitleProps = {
   variant?: Variant
@@ -29,6 +29,7 @@ const fontSize = {
 const titleColors = {
   primary: 'text-primary',
   secondary: 'text-secondary',
+  danger: 'text-danger',
   inverse: 'text-inverse',
 }
 

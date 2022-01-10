@@ -141,7 +141,6 @@ function App() {
           <Outlet />
         </main>
         <Footer nowPlayingSong={data.nowPlayingSong} />
-        <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(data.ENV)};`,
@@ -165,6 +164,7 @@ function App() {
       `,
           }}
         />
+        <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>
