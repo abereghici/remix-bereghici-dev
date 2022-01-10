@@ -7,6 +7,7 @@ type Props = {
     slug: string
     body: string
     createdBy: string
+    avatarUrl: string
     createdAt: Date
     updatedAt: Date
   }
@@ -18,6 +19,15 @@ export default function BlogPostComment({comment, user}: Props) {
     <div className="flex flex-col mt-6 mb-6">
       <div className="prose dark:prose-dark w-full">{comment.body}</div>
       <div className="flex items-center space-x-3">
+        {comment.avatarUrl && (
+          <img
+            alt="User avatar"
+            height={24}
+            width={24}
+            src={comment.avatarUrl}
+            className="rounded-full"
+          />
+        )}
         <p className="text-sm text-gray-500">{comment.createdBy}</p>
         <span className=" text-gray-200 dark:text-gray-800">/</span>
         <p className="text-sm text-gray-400 dark:text-gray-600">

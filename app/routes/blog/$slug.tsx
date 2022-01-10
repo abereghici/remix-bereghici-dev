@@ -185,6 +185,7 @@ export default function FullArticle() {
           slug: page.slug,
           body: "What a beautiful and useful website! I'm inspired by the Snippets section. I would like to build it for myself. 😁",
           createdBy: 'Zain Fathoni',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/6989817?v=4',
           createdAt: new Date(),
           updatedAt: new Date(),
         }}
@@ -195,6 +196,7 @@ export default function FullArticle() {
           slug: page.slug,
           body: "What a beautiful and useful website! I'm inspired by the Snippets section. I would like to build it for myself. 😁",
           createdBy: 'Zain Fathoni',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/6989817?v=4',
           createdAt: new Date(),
           updatedAt: new Date(),
         }}
