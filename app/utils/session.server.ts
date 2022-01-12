@@ -1,14 +1,17 @@
 import {createCookieSessionStorage, Session} from 'remix'
 import {getRequiredServerEnvVar} from './misc'
 
+const sessionExpirationTime = 1000 * 60 * 60 * 24 * 365 // 1 year
+
 export let sessionStorage = createCookieSessionStorage({
   cookie: {
     name: '__bereghici.dev_session',
-    httpOnly: true,
-    path: '/',
-    sameSite: 'lax',
+    secure: true,
     secrets: [getRequiredServerEnvVar('SESSION_SECRET')],
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: sessionExpirationTime / 1000,
+    httpOnly: true,
   },
 })
 
