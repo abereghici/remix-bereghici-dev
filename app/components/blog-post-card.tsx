@@ -35,7 +35,7 @@ export default function BlogPostCard({
             👀
           </span>
           <span className="capsize align-baseline ml-2">
-            {views.count ? views.count.toLocaleString() : '–'}
+            {views ? views.toLocaleString() : '–'}
           </span>
         </div>
       </div>

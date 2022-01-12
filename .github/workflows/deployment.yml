@@ -143,7 +143,9 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
 
       - name: 🐳 Docker compose
-        run: docker-compose up -d
+        run: docker-compose up -d && sleep 3 && npx prisma migrate reset --force
+        env:
+          DATABASE_URL: 'postgresql://alex:alex_rocks@localhost:5432/bereghici_dev_db?schema=public'
 
       - name: 🌳 Cypress run
         uses: cypress-io/github-action@v2

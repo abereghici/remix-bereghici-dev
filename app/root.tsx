@@ -141,7 +141,6 @@ function App() {
           <Outlet />
         </main>
         <Footer nowPlayingSong={data.nowPlayingSong} />
-        <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(data.ENV)};`,
@@ -165,6 +164,7 @@ function App() {
       `,
           }}
         />
+        <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === 'development' ? <LiveReload /> : null}
       </body>
@@ -178,7 +178,7 @@ export default function AppWithProviders() {
   return (
     <ThemeProvider
       specifiedTheme={data.requestInfo.session.theme}
-      themeAction="action/set-theme"
+      themeAction="/action/set-theme"
     >
       <App />
     </ThemeProvider>
