@@ -1,91 +1,85 @@
-import type {MdxPage, MdxListItem, Post, PostViews, PostItem} from '~/types'
+import type {Post as PrismaPost} from '@prisma/client'
+import type {MdxPage, MdxListItem, Post, PostItem, GithubUser} from '~/types'
 import {getMdxPage, getBlogMdxListItems} from './mdx'
 import type {Timings} from './metrics.server'
+import {typedBoolean} from './misc'
 import {prisma} from './prisma.server'
 
-function toPost(page: MdxPage, views: PostViews): Post {
+function toPost(page: MdxPage, post: PrismaPost): Post {
   return {
     ...page,
-    views,
+    ...post,
   }
 }
 
-function toPostItem(page: MdxListItem, views: PostViews): PostItem {
+function toPostItem(page: MdxListItem, post: PrismaPost): PostItem {
   return {
     ...page,
-    views,
+    ...post,
   }
 }
 
 async function getAllPostViewsCount() {
   try {
-    const allViews = await prisma.views.aggregate({
+    const allViews = await prisma.post.aggregate({
       _sum: {
-        count: true,
+        views: true,
       },
     })
 
-    return Number(allViews._sum.count)
+    return Number(allViews._sum.views)
   } catch (error: unknown) {
     console.log(error)
     return 0
   }
 }
 
-async function getPostViewsForSlug(slug: string) {
-  try {
-    const postViews = await prisma.views.findFirst({
-      where: {
-        slug: {
-          equals: slug,
+async function getPostBySlug(slug: string) {
+  return prisma.post.findFirst({
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+    include: {
+      comments: {
+        orderBy: {
+          createdAt: 'desc',
         },
       },
-    })
-
-    return postViews
-  } catch (error: unknown) {
-    console.log(error)
-    return 0
-  }
+    },
+  })
 }
 
-async function getPostViewsForSlugs(slugs: Array<string>) {
+async function getPostsBySlugs(slugs: Array<string>) {
   try {
-    const allViews = await prisma.views.findMany({
-      select: {
-        id: true,
-        slug: true,
-        count: true,
-      },
+    return prisma.post.findMany({
       where: {
         slug: {
           in: slugs,
         },
       },
     })
-
-    return allViews
   } catch (error: unknown) {
     console.log(error)
     return []
   }
 }
 
-async function addPostRead(viewId: number | bigint, slug: string) {
+async function addPostRead(slug: string) {
   try {
-    if (viewId) {
-      return await prisma.views.update({
-        where: {id: viewId},
-        data: {count: {increment: 1}},
-      })
-    } else {
-      return await prisma.views.create({
-        data: {
-          slug,
-          count: 1,
+    return await prisma.post.upsert({
+      where: {slug},
+      create: {
+        slug,
+        views: 1,
+      },
+      update: {
+        views: {
+          increment: 1,
         },
-      })
-    }
+      },
+    })
   } catch (error: unknown) {
     console.error(error)
   }
@@ -111,22 +105,30 @@ async function getAllPosts({
     posts = posts.slice(0, limit)
   }
 
-  const postViews = await getPostViewsForSlugs(posts.map(p => p.slug))
+  const dbPosts = await getPostsBySlugs(posts.map(p => p.slug))
 
-  const postsWithViews = posts.map(post => {
-    const views = postViews.find(view => view.slug === post.slug)
+  const postsWithViews = posts
+    .map(async post => {
+      const currentDbPost =
+        dbPosts.find(view => view.slug === post.slug) ||
+        (await createPost(post.slug))
 
-    return {
-      ...toPostItem(
-        post,
-        views
-          ? {id: String(views.id), count: Number(views.count)}
-          : {id: undefined, count: 0},
-      ),
-    }
+      return {
+        ...toPostItem(post, currentDbPost),
+      }
+    })
+    .filter(typedBoolean)
+
+  return Promise.all(postsWithViews)
+}
+
+async function createPost(slug: string) {
+  return prisma.post.create({
+    data: {
+      slug,
+      views: 0,
+    },
   })
-
-  return postsWithViews
 }
 
 async function getPost({
@@ -150,21 +152,48 @@ async function getPost({
     return null
   }
 
-  const views = await getPostViewsForSlug(slug)
+  const post = (await getPostBySlug(slug)) || (await createPost(slug))
 
-  return toPost(
-    page,
-    views
-      ? {id: String(views.id), count: Number(views.count)}
-      : {id: undefined, count: 0},
-  )
+  return toPost(page, post)
+}
+
+async function createPostComment({
+  postId,
+  body,
+  user,
+}: {
+  body: string
+  postId: string
+  user: GithubUser
+}) {
+  const authorName = user.name.givenName ?? user.displayName
+
+  return prisma.comment.create({
+    data: {
+      body,
+      authorName,
+      authorAvatarUrl: user.photos?.[0]?.value,
+      postId,
+    },
+  })
+}
+
+async function deletePostComment(commentId: string) {
+  return prisma.comment.delete({
+    where: {
+      id: commentId,
+    },
+  })
 }
 
 export {
   getAllPosts,
   getPost,
-  getPostViewsForSlugs,
-  getPostViewsForSlug,
+  createPost,
+  getPostsBySlugs,
+  getPostBySlug,
   getAllPostViewsCount,
   addPostRead,
+  createPostComment,
+  deletePostComment,
 }

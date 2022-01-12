@@ -13,7 +13,7 @@ export default function BlogPost({post}: {post: PostItem}) {
         {title}
       </H4>
       <Paragraph variant="secondary" className="mb-4">
-        {`${views.count ? views.count.toLocaleString() : '–'} views`}
+        {`${views ? views.toLocaleString() : '–'} views`}
       </Paragraph>
       <div className="flex flex-wrap mb-2">
         {categories.map(category => (

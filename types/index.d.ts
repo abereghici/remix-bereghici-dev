@@ -4,6 +4,7 @@
 import type {ActionFunction, LoaderFunction} from 'remix'
 import calculateReadingTime from 'reading-time'
 import {GitHubProfile} from 'remix-auth-github'
+import type {Post as PrismaPost, Comment} from '@prisma/client'
 
 export type SpotifySong = {
   album: string
@@ -26,7 +27,12 @@ type GitHubRepo = {
   }
 }
 
-type GithubUser = Pick<GitHubProfile, 'id' | 'displayName' | 'photos' | 'name'>
+type GithubUser = Pick<
+  GitHubProfile,
+  'id' | 'displayName' | 'photos' | 'name'
+> & {
+  admin: boolean
+}
 
 type MdxPage = {
   code: string
@@ -47,18 +53,10 @@ type MdxPage = {
   }
 }
 
-interface PostViews {
-  id?: string
-  count: number
+interface Post extends MdxPage, PrismaPost {
+  comments?: Array<Comment>
 }
-
-interface Post extends MdxPage {
-  views: PostViews
-}
-
-interface PostItem extends MdxListItem {
-  views: PostViews
-}
+interface PostItem extends MdxListItem, PrismaPost {}
 
 type MdxListItem = Omit<MdxPage, 'code'>
 
@@ -109,6 +107,7 @@ export {
   MdxPage,
   MdxListItem,
   Post,
+  Comment,
   PostItem,
   PostViews,
   AppSitemapEntry,

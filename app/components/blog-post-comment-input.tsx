@@ -8,7 +8,7 @@ export default function BlogPostCommentInput() {
   const comments = useFetcher()
   const ref = React.useRef<HTMLFormElement>(null)
 
-  const submitting = comments.state === 'submitting'
+  const busy = comments.state === 'submitting'
 
   React.useEffect(() => {
     if (comments.type === 'done' && comments.data.success) {
@@ -34,8 +34,8 @@ export default function BlogPostCommentInput() {
             {comments.data.error}
           </Paragraph>
         ) : null}
-        <Button type="submit" className="ml-auto mt-4" disabled={submitting}>
-          {submitting ? 'Submitting...' : 'Submit'}
+        <Button type="submit" className="ml-auto mt-4" disabled={busy}>
+          {busy ? 'Submitting...' : 'Submit'}
         </Button>
       </comments.Form>
     </div>

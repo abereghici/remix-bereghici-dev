@@ -3,7 +3,12 @@ import {json, LinksFunction, useCatch, useFetcher, useLoaderData} from 'remix'
 import parseISO from 'date-fns/parseISO'
 import format from 'date-fns/format'
 import {mdxPageMeta, useMdxComponent, getBlogMdxListItems} from '~/utils/mdx'
-import {getPost, addPostRead} from '~/utils/blog.server'
+import {
+  getPost,
+  addPostRead,
+  createPostComment,
+  deletePostComment,
+} from '~/utils/blog.server'
 import {authenticator} from '~/utils/auth.server'
 import {commitSession, getSession} from '~/utils/session.server'
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
@@ -44,20 +49,14 @@ export const handle: AppHandle = {
   },
 }
 
-const markPostAsRead = async (slug: string, request: Request) => {
-  const post = await getPost({
-    slug,
-    request,
-  })
-
-  if (!post) {
+const markPostAsRead = async (slug: string) => {
+  try {
+    await addPostRead(slug)
+    return json({success: true})
+  } catch (e: unknown) {
+    console.error(e)
     return json({success: false})
   }
-
-  const viewId = Number(post.views.id)
-  await addPostRead(isNaN(viewId) ? 0 : viewId, slug)
-
-  return json({success: true})
 }
 
 const authenticate = async (request: Request) => {
@@ -74,6 +73,19 @@ const createComment = async (
   request: Request,
 ) => {
   const user = await authenticator.isAuthenticated(request)
+  const post = await getPost({
+    slug,
+    request,
+  })
+
+  if (!post) {
+    return json(
+      {
+        error: 'Cannot find post by slug',
+      },
+      400,
+    )
+  }
 
   if (!user) {
     return json(
@@ -95,31 +107,49 @@ const createComment = async (
     )
   }
 
-  const comment = {
-    body,
-    slug,
-    createdBy: user?.displayName,
-    avatarUrl: user?.photos?.[0]?.value,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+  try {
+    await createPostComment({body, postId: post.id, user})
+  } catch (e: unknown) {
+    console.error(e)
+    return json({error: 'Failed to create comment'}, 500)
   }
 
   return json({success: true})
 }
 
+async function deleteComment(formData: FormData, request: Request) {
+  const commentId = formData.get('commentId')
+
+  if (!commentId || typeof commentId !== 'string') {
+    return json({success: false})
+  }
+
+  try {
+    await deletePostComment(commentId)
+    return json({success: true})
+  } catch (e: unknown) {
+    console.error(e)
+    return json({success: false})
+  }
+}
+
 export const action: AppAction<{slug: string}> = async ({request, params}) => {
+  const {slug} = params
   const formData = await request.formData()
   const type = formData.get('actionType')
 
   switch (type) {
     case 'markRead': {
-      return markPostAsRead(params.slug, request)
+      return markPostAsRead(slug)
     }
     case 'authenticate': {
       return authenticate(request)
     }
     case 'createComment': {
-      return createComment(params.slug, formData, request)
+      return createComment(slug, formData, request)
+    }
+    case 'deleteComment': {
+      return deleteComment(formData, request)
     }
     default:
       break
@@ -167,7 +197,7 @@ export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
 
 export default function FullArticle() {
   const {page, auth} = useLoaderData<LoaderData>()
-  const {frontmatter, readTime, code, views} = page
+  const {frontmatter, readTime, code, views, comments} = page
   const {title, date, draft} = frontmatter
 
   const Component = useMdxComponent(code)
@@ -175,13 +205,19 @@ export default function FullArticle() {
   const readMarker = React.useRef<HTMLDivElement>(null)
   const markRead = useFetcher()
 
+  const markReadRef = React.useRef(markRead)
+
+  React.useEffect(() => {
+    markReadRef.current = markRead
+  }, [markRead])
+
   useOnRead({
     parentElRef: readMarker,
     time: readTime?.time,
     onRead: React.useCallback(() => {
       if (draft) return
-      markRead.submit({actionType: 'markRead'}, {method: 'post'})
-    }, [draft, markRead]),
+      markReadRef.current.submit({actionType: 'markRead'}, {method: 'post'})
+    }, [draft]),
   })
 
   return (
@@ -207,7 +243,7 @@ export default function FullArticle() {
         <Paragraph size="small" className="t min-w-32 mt-2 md:mt-0">
           {readTime?.text}
           {` • `}
-          {views.count} views
+          {views ?? 0} views
         </Paragraph>
       </div>
       <div ref={readMarker} className="prose dark:prose-dark mt-9">
@@ -220,28 +256,15 @@ export default function FullArticle() {
         <BlogPostCommentAuthenticate error={auth.error} />
       )}
 
-      <BlogPostComment
-        user={auth.user}
-        comment={{
-          slug: page.slug,
-          body: "What a beautiful and useful website! I'm inspired by the Snippets section. I would like to build it for myself. 😁",
-          createdBy: 'Zain Fathoni',
-          avatarUrl: 'https://avatars.githubusercontent.com/u/6989817?v=4',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }}
-      />
-      <BlogPostComment
-        user={auth.user}
-        comment={{
-          slug: page.slug,
-          body: "What a beautiful and useful website! I'm inspired by the Snippets section. I would like to build it for myself. 😁",
-          createdBy: 'Zain Fathoni',
-          avatarUrl: 'https://avatars.githubusercontent.com/u/6989817?v=4',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }}
-      />
+      {comments?.length
+        ? comments.map(comment => (
+            <BlogPostComment
+              key={comment.id}
+              user={auth.user}
+              comment={comment}
+            />
+          ))
+        : null}
     </ResponsiveContainer>
   )
 }

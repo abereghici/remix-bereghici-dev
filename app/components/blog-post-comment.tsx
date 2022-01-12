@@ -1,43 +1,56 @@
 import * as React from 'react'
 import format from 'date-fns/format'
-import type {GithubUser} from '~/types'
+import type {GithubUser, Comment} from '~/types'
+import {useFetcher} from 'remix'
+import {Paragraph} from './typography'
 
 type Props = {
-  comment: {
-    slug: string
-    body: string
-    createdBy: string
-    avatarUrl: string
-    createdAt: Date
-    updatedAt: Date
-  }
+  comment: Comment
   user: GithubUser | null
 }
 
 export default function BlogPostComment({comment, user}: Props) {
+  const commentFetcher = useFetcher()
+
+  const busy = commentFetcher.state === 'submitting'
+
+  const deleteComment = () => {
+    commentFetcher.submit(
+      {
+        actionType: 'deleteComment',
+        commentId: comment.id,
+      },
+      {method: 'post'},
+    )
+  }
+
   return (
     <div className="flex flex-col mt-6 mb-6">
-      <div className="prose dark:prose-dark w-full">{comment.body}</div>
+      <Paragraph className="w-full mb-2">{comment.body}</Paragraph>
       <div className="flex items-center space-x-3">
-        {comment.avatarUrl && (
+        {comment.authorAvatarUrl && (
           <img
             alt="User avatar"
             height={24}
             width={24}
-            src={comment.avatarUrl}
+            src={comment.authorAvatarUrl}
             className="rounded-full"
           />
         )}
-        <p className="text-sm text-gray-500">{comment.createdBy}</p>
-        <span className=" text-gray-200 dark:text-gray-800">/</span>
-        <p className="text-sm text-gray-400 dark:text-gray-600">
+        <Paragraph variant="secondary">{comment.authorName}</Paragraph>
+        <span className="text-gray-300 dark:text-gray-200">/</span>
+        <Paragraph size="small">
           {format(new Date(comment.updatedAt), "d MMM yyyy 'at' h:mm bb")}
-        </p>
-        {user && comment.createdBy === user.displayName && (
+        </Paragraph>
+        {user && user.admin && (
           <>
-            <span className="text-gray-200 dark:text-gray-800">/</span>
-            <button className="text-sm text-red-600 dark:text-red-400">
-              Delete
+            <span className="text-gray-300 dark:text-gray-200">/</span>
+            <button
+              className="text-sm text-primary underline"
+              onClick={deleteComment}
+              disabled={busy}
+            >
+              {busy ? 'Deleting...' : 'Delete'}
             </button>
           </>
         )}

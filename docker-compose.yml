@@ -9,3 +9,11 @@ services:
       - ./.cache/redis:/data
     ports:
       - '6379:6379'
+  database:
+    image: 'postgres:13'
+    environment:
+      - POSTGRES_USER=alex
+      - POSTGRES_PASSWORD=alex_rocks
+      - POSTGRES_DB=bereghici_dev_db
+    ports:
+      - '5432:5432'

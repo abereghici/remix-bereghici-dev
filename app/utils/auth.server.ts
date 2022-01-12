@@ -18,6 +18,7 @@ let gitHubStrategy = new GitHubStrategy(
       displayName: profile.displayName,
       photos: profile.photos,
       name: profile.name,
+      admin: profile.id == getRequiredServerEnvVar('GITHUB_ADMIN_ID'),
     }
   },
 )
