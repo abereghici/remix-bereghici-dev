@@ -12,10 +12,10 @@ export default function NavigationLink({
         prefetch="intent"
         className={({isActive}) =>
           clsx(
-            'dark:hover:bg-gray-800 hidden p-1 hover:bg-gray-200 rounded-lg sm:px-3 sm:py-2 md:inline-block',
+            'dark:hover:bg-gray-700 hidden p-1 hover:bg-gray-200 rounded-lg sm:px-3 sm:py-2 md:inline-block',
             {
-              'font-semibold text-gray-800 dark:text-gray-200': isActive,
-              'font-normal text-gray-600 dark:text-gray-400': !isActive,
+              'font-bold text-gray-800 dark:text-gray-100': isActive,
+              'font-normal text-gray-600 dark:text-gray-200': !isActive,
             },
           )
         }

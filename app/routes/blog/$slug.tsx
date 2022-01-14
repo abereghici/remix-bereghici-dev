@@ -117,7 +117,7 @@ const createComment = async (
   return json({success: true})
 }
 
-async function deleteComment(formData: FormData, request: Request) {
+async function deleteComment(formData: FormData) {
   const commentId = formData.get('commentId')
 
   if (!commentId || typeof commentId !== 'string') {
@@ -149,7 +149,7 @@ export const action: AppAction<{slug: string}> = async ({request, params}) => {
       return createComment(slug, formData, request)
     }
     case 'deleteComment': {
-      return deleteComment(formData, request)
+      return deleteComment(formData)
     }
     default:
       break
