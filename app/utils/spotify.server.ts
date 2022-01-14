@@ -75,10 +75,6 @@ async function getTopTracks() {
           } as SpotifySong),
       ),
     )
-    .then(tracks => {
-      console.log({tracks})
-      return tracks
-    })
     .catch(() => [] as SpotifySong[])
 }
 
