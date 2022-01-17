@@ -11,22 +11,24 @@ describe('comments', () => {
       cy.findByRole('link', {name: /📰 blog/i}).click()
     })
 
-    cy.findByRole('heading', {
-      name: /headings & accessibility/i,
-    }).click()
+    cy.get('main').within(() => {
+      cy.findByRole('heading', {
+        name: /headings & accessibility/i,
+      }).click()
 
-    cy.findByTestId('comments-form').should('be.visible')
+      cy.findByTestId('comments-form').should('be.visible')
 
-    const message = 'Cypress: Testing comments'
+      const message = 'Cypress: Testing comments'
 
-    cy.get('textarea[name="body"]').type(message)
+      cy.get('textarea[name="body"]').type(message)
 
-    cy.contains('Submit').click()
+      cy.contains('Submit').click()
 
-    cy.contains(message).should('be.visible')
+      cy.contains(message).should('be.visible')
 
-    cy.contains('Delete').first().click()
+      cy.contains('Delete').first().click()
 
-    cy.contains(message).should('not.exist')
+      cy.contains(message).should('not.exist')
+    })
   })
 })
