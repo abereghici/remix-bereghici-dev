@@ -11,7 +11,9 @@ describe('comments', () => {
       cy.findByRole('link', {name: /📰 blog/i}).click()
     })
 
-    cy.get('main').within(() => {
+    cy.wait(3000)
+
+    cy.get('#main').within(() => {
       cy.findByRole('heading', {
         name: /headings & accessibility/i,
       }).click()
