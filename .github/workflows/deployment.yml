@@ -159,8 +159,6 @@ jobs:
         env:
           PORT: '8811'
           RUNNING_E2E: 'true'
-          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
-          REDIS_URL: ${{ secrets.REDIS_CI_TEST_URL }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           DISABLE_TELEMETRY: 'true'
   build:
