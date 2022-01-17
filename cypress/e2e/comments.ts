@@ -11,12 +11,12 @@ describe('comments', () => {
       cy.findByRole('link', {name: /📰 blog/i}).click()
     })
 
-    cy.wait(3000)
-
     cy.get('#main').within(() => {
       cy.findByRole('heading', {
         name: /headings & accessibility/i,
-      }).click()
+      })
+        .should('be.visible')
+        .click()
 
       cy.findByTestId('comments-form').should('be.visible')
 
