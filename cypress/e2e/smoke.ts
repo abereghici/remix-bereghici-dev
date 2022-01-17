@@ -10,7 +10,9 @@ describe('smoke', () => {
 
     cy.findByRole('heading', {
       name: /headings & accessibility/i,
-    }).click()
+    })
+      .should('be.visible')
+      .click()
 
     cy.get('html').should('have.class', 'light')
 

@@ -11,7 +11,7 @@ describe('comments', () => {
       cy.findByRole('link', {name: /📰 blog/i}).click()
     })
 
-    cy.location('pathname', {timeout: 1000}).should('include', '/blog')
+    cy.location('pathname', {timeout: 10000}).should('include', '/blog')
 
     cy.findByRole('heading', {
       name: /headings & accessibility/i,
