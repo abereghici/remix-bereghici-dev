@@ -141,6 +141,10 @@ jobs:
         env:
           ENABLE_TEST_ROUTES: 'true'
           COMMIT_SHA: ${{ github.sha }}
+          GITHUB_CLIENT_ID: ''
+          GITHUB_CLIENT_SECRET: ''
+          GITHUB_CALLBACK_URL: ''
+          GITHUB_ADMIN_ID: ''
 
       - name: 🐳 Docker compose
         run: docker-compose up -d && sleep 3 && npx prisma migrate reset --force
