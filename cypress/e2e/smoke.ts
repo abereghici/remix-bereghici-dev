@@ -12,7 +12,7 @@ describe('smoke', () => {
       name: /headings & accessibility/i,
     })
       .should('be.visible')
-      .click()
+      .click({force: true})
 
     cy.get('html').should('have.class', 'light')
 

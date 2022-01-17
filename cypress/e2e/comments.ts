@@ -17,7 +17,7 @@ describe('comments', () => {
       name: /headings & accessibility/i,
     })
       .should('be.visible')
-      .click()
+      .click({force: true})
 
     cy.findByTestId('comments-form').should('be.visible')
 
