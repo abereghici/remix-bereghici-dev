@@ -163,10 +163,10 @@ jobs:
           REDIS_URL: ${{ secrets.REDIS_CI_TEST_URL }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           DISABLE_TELEMETRY: 'true'
-          GITHUB_CLIENT_ID: ''
-          GITHUB_CLIENT_SECRET: ''
-          GITHUB_CALLBACK_URL: ''
-          GITHUB_ADMIN_ID: ''
+          GITHUB_CLIENT_ID: 'dummy'
+          GITHUB_CLIENT_SECRET: 'dummy'
+          GITHUB_CALLBACK_URL: 'dummy'
+          GITHUB_ADMIN_ID: 'dummy'
   build:
     name: 🐳 Build
     needs: [changes]
