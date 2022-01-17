@@ -19,7 +19,12 @@ export default function BlogPostCommentInput() {
   return (
     <div className="border border-green-600 rounded p-6 my-6 w-full dark:border-gray-800 bg-green-100 dark:bg-gray-600">
       <H5>Leave a comment</H5>
-      <comments.Form ref={ref} className="my-4" method="post">
+      <comments.Form
+        ref={ref}
+        className="my-4"
+        method="post"
+        data-testid="comments-form"
+      >
         <input hidden name="actionType" defaultValue="createComment" />
         <TextareaAutosize
           aria-label="Your comment"
