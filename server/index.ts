@@ -58,7 +58,7 @@ app.use((req, res, next) => {
 
 app.use(compression())
 
-if (MODE === 'production') {
+if (MODE === 'production' && process.env.RUNNING_E2E !== 'true') {
   const allowedOrigins = ['https://bereghici.dev']
 
   app.use(
