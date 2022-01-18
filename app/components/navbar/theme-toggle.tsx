@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {useTheme, Theme} from 'remix-themes'
+import {motion} from 'framer-motion'
 
 export const useLoaded = () => {
   const [loaded, setLoaded] = React.useState(false)
@@ -13,28 +14,49 @@ export default function ThemeToggle() {
   const loaded = useLoaded()
 
   return (
-    <button
+    <motion.button
       aria-label="Toggle Theme"
       type="button"
-      className="flex items-center justify-center w-9 h-9 bg-gray-200 dark:bg-gray-600 rounded-lg transition hover:ring-2 ring-gray-300"
+      className="flex items-center justify-center w-9 h-9 bg-gray-200 dark:bg-gray-600 rounded-lg hover:ring-2 ring-gray-300"
       onClick={() => setTheme(theme === Theme.DARK ? Theme.LIGHT : Theme.DARK)}
     >
       {theme === Theme.DARK && loaded && <SunIcon />}
       {theme === Theme.LIGHT && loaded && <MoonIcon />}
-    </button>
+    </motion.button>
   )
 }
 
+const transition = {
+  type: 'spring',
+  stiffness: 200,
+  damping: 10,
+}
+
+const whileTap = {
+  scale: 0.95,
+  rotate: 15,
+}
+
 function MoonIcon() {
+  const variants = {
+    initial: {scale: 0.6, rotate: 90},
+    animate: {scale: 1, rotate: 0, transition},
+    whileTap,
+  }
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      className="animate-fade-in-stroke w-5 h-5 dark:text-gray-200 text-gray-800"
+      className="w-5 h-5 dark:text-gray-200 text-gray-800"
     >
-      <path
+      <motion.path
+        initial="initial"
+        animate="animate"
+        whileTap="whileTap"
+        variants={variants}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
@@ -45,15 +67,23 @@ function MoonIcon() {
 }
 
 function SunIcon() {
+  const variants = {
+    initial: {rotate: 45},
+    animate: {rotate: 0, transition},
+  }
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      className="animate-fade-in-stroke w-5 h-5 dark:text-gray-200 text-gray-800"
+      className=" w-5 h-5 dark:text-gray-200 text-gray-800"
     >
-      <path
+      <motion.path
+        initial="initial"
+        animate="animate"
+        variants={variants}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}

@@ -28,6 +28,10 @@ export default async function handleRequest(
 
   responseHeaders.set('Content-Type', 'text/html')
   responseHeaders.set('Content-Length', String(Buffer.byteLength(html)))
+  responseHeaders.set('X-Frame-Options', 'deny')
+  responseHeaders.set('X-Content-Type-Options', 'nosniff')
+  responseHeaders.set('Referrer-Policy', 'no-referrer-when-downgrade')
+  responseHeaders.set('Permissions-Policy', 'fullscreen=()')
 
   // https://securityheaders.com
   const ContentSecurityPolicy = `

@@ -56,6 +56,11 @@ export default function Footer({
               Email
             </Link>
           </div>
+          <div className="flex flex-col space-y-6">
+            <Link to="/blog/rss.xml" external>
+              RSS
+            </Link>
+          </div>
         </div>
       </div>
     </ResponsiveContainer>

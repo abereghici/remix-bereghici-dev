@@ -3,6 +3,7 @@ import onFinished from 'on-finished'
 import express from 'express'
 import compression from 'compression'
 import morgan from 'morgan'
+import cors from 'cors'
 import * as Sentry from '@sentry/node'
 import {createRequestHandler} from '@remix-run/express'
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -56,6 +57,28 @@ app.use((req, res, next) => {
 })
 
 app.use(compression())
+
+const allowedOrigins = ['http://localhost:3000', 'https://bereghici.dev']
+
+app.use(
+  cors({
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    origin(origin, callback) {
+      // allow requests with no origin
+      // (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true)
+      }
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          'The CORS policy for this site does not ' +
+          'allow access from the specified Origin.'
+        return callback(new Error(msg), false)
+      }
+      return callback(null, true)
+    },
+  }),
+)
 
 const publicAbsolutePath = here('../public')
 
