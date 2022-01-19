@@ -1,6 +1,11 @@
 import type {LoaderFunction} from 'remix'
+import type {AppHandle} from '~/types'
 import {authenticator} from '~/utils/auth.server'
 import {getSession} from '~/utils/session.server'
+
+export const handle: AppHandle = {
+  getSitemapEntries: () => null,
+}
 
 export let loader: LoaderFunction = async ({request}) => {
   let session = await getSession(request)

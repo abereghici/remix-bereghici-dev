@@ -117,7 +117,7 @@ jobs:
       fail-fast: false
       matrix:
         # run 3 copies of the current job in parallel
-        containers: ['🤠 Alex', '🤖 Alexandru', '🥷 Sasha']
+        containers: ['🤠 Job #1', '🤖 Job #2', '🥷 Job #3']
     steps:
       - name: 🛑 Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
