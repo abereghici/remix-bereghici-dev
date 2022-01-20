@@ -16,6 +16,7 @@ const pathedRoutes: Record<string, Handler> = {
       headers: {
         'Content-Type': 'application/xml',
         'Content-Length': String(Buffer.byteLength(rss)),
+        'Access-Control-Allow-Origin': '*',
       },
     })
   },
@@ -25,6 +26,7 @@ const pathedRoutes: Record<string, Handler> = {
       headers: {
         'Content-Type': 'application/xml',
         'Content-Length': String(Buffer.byteLength(sitemap)),
+        'Access-Control-Allow-Origin': '*',
       },
     })
   },
