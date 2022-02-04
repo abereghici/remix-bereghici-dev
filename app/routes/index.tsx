@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {json, LoaderFunction, useLoaderData} from 'remix'
+import {motion} from 'framer-motion'
 import {getAllPosts} from '~/utils/blog.server'
 
 import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
@@ -56,11 +57,14 @@ export default function IndexRoute() {
       <H2 className="mb-6 tracking-tight">Latest Posts</H2>
       <div className="flex flex-col gap-6">
         {posts.map((post: PostItem, index: number) => (
-          <BlogPostCard
+          <motion.div
+            whileHover={{scale: 1.02}}
+            whileTap={{scale: 0.99}}
             key={post.slug}
-            post={post}
-            gradient={gradients[index]!}
-          />
+            className="w-full"
+          >
+            <BlogPostCard post={post} gradient={gradients[index]!} />
+          </motion.div>
         ))}
       </div>
       <Link
@@ -78,7 +82,14 @@ export default function IndexRoute() {
           <H2 className="mb-5 tracking-tight">GitHub Contributions</H2>
           <ul>
             {contributedRepos.map((repo: GitHubRepo) => (
-              <GithubRepoCard key={repo.id} repo={repo} />
+              <motion.li
+                whileHover={{scale: 1.02}}
+                whileTap={{scale: 0.99}}
+                key={repo.id}
+                className="w-full"
+              >
+                <GithubRepoCard repo={repo} />
+              </motion.li>
             ))}
           </ul>
           <Link

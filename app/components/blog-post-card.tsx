@@ -17,11 +17,7 @@ export default function BlogPostCard({
     <Link
       prefetch="intent"
       to={`/blog/${slug}`}
-      className={clsx(
-        'hover:scale-[1.01] transform transition-all will-change-transform',
-        'p-1 w-full bg-gradient-to-r rounded-xl',
-        gradient,
-      )}
+      className={clsx('p-1 w-full bg-gradient-to-r rounded-xl block', gradient)}
     >
       <div className="bg-primary flex flex-col justify-between p-4 h-full rounded-lg">
         <Title as="h3" size="h6" className="mb-2 w-full tracking-tight">
