@@ -20,10 +20,10 @@ jobs:
           node-version: 16
 
       - name: Clear lockfile
-        run: rm -rf package-lock.json
+        run: rm -rf package-lock.json node_modules
 
       - name: Install dependencies
-        run: npm i --package-lock-only
+        run: npm i
 
       - name: Create Pull Request
         id: createpr
