@@ -102,6 +102,7 @@
     "@types/redis": "^2.8.32",
     "autoprefixer": "^10.4.0",
     "concurrently": "^6.5.1",
+    "cssnano": "^5.0.15",
     "cypress": "^9.2.0",
     "dotenv-cli": "^4.1.1",
     "esbuild-jest": "^0.5.0",
