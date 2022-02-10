@@ -18,7 +18,7 @@ async function getFeaturedGithubContributions(options?: CachifiedOptions) {
           'justinribeiro/lighthouse-action',
           'remix-run/remix',
           'csstree/csstree',
-          'edmundhung/remix-guide',
+          'date-fns/date-fns',
         ]
         const {contributedRepos} = await getRepositoriesContributedTo()
 
