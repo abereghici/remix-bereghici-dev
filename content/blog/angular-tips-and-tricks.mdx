@@ -23,7 +23,7 @@ So, if you’re diving into Angular for the first time or just looking for a
 better way to manage your Angular projects, here are some tips and tricks you
 might want to keep in mind along the way.
 
-##### Unsubscribe from RxJS observables
+#### Unsubscribe from RxJS observables
 
 Every time a component or directive is destroyed, the subscription to observable
 remains active. So it is important to unsubscribe from it to release the memory
@@ -193,7 +193,7 @@ console. We can extend this exception handler to add some additional
 functionalities like to send the errors to your backend server for analytics or
 other reasons.
 
-###### Extending Angular’s Error Handler
+#### Extending Angular’s Error Handler
 
 Extending Angular’s Error Handler it’s a easy task. All we need to do is to
 create a class that extends Angular’s `ErrorHandler` and override the

@@ -26,7 +26,7 @@ export default function Link({
         {...rest}
         href={href}
         target="_blank"
-        rel="noopener noreferrer"
+        rel="noopener noreferrer nofollow"
         className={classes}
       >
         {children}

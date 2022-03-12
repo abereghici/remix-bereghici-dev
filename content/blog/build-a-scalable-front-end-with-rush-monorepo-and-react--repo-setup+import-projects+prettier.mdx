@@ -50,7 +50,7 @@ won't cover in this article the pros and cons of choosing this approach, because
 there are plenty of resources that debate this topic, instead, I'll focus on the
 implementation of a scalable monorepo using Rush.js and React.
 
-#### Tools
+### Tools
 
 We'll be using the following tools:
 
@@ -64,7 +64,7 @@ We'll be using the following tools:
 - [Github Actions](https://github.com/features/actions)
 - [Netlify](https://www.netlify.com/)
 
-#### Goals
+### Goals
 
 Before implementing the monorepo, let's define the goals we want to achieve
 using these tools:
@@ -75,7 +75,7 @@ using these tools:
 - Enforced rules for code quality
 - Automated workflow for development
 
-#### TL;DR
+### TL;DR
 
 If you're interested in just see the code, you can find it here:
 [https://github.com/abereghici/rush-monorepo-boilerplate](https://github.com/abereghici/rush-monorepo-boilerplate)
@@ -84,14 +84,14 @@ If you want to see an example with Rush used in a real, large project, you can
 look at [ITwin.js](https://github.com/imodeljs/imodeljs), an open-source project
 developed by Bentley Systems.
 
-#### Guide
+### Guide
 
-##### Create a new repository
+#### Create a new repository
 
 I assume you already created an empty Github repository for this project. Let's
 clone it locally and let the magic begin!
 
-##### Initialize the rush monorepo
+#### Initialize the rush monorepo
 
 Inside of your project folder, run the following commands:
 
@@ -115,7 +115,7 @@ git commit -m "Initial commit"
 git push origin master
 ```
 
-##### Import existing projects without loosing git history
+#### Import existing projects without loosing git history
 
 You don't really want to perform a migration to monorepo if you lose all the
 history of your projects. If everything will point to the commit where you
@@ -173,7 +173,7 @@ git commit -m "Imported react-app project"
 git push origin master
 ```
 
-##### Adding Prettier
+#### Adding Prettier
 
 We want to have consistent syntax and formatting across all code files in our
 monorepo. So we'll apply Prettier globally for the entire repository. We'll run

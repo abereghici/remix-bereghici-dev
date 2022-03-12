@@ -11,6 +11,8 @@ import {
 import {cachified, CachifiedOptions} from '~/utils/cache.server'
 import {getSocialMetas} from '~/utils/seo'
 
+import Link from '~/components/link'
+
 import type {LoaderData as RootLoaderData} from '../root'
 
 import type {GitHubFile, MdxListItem, MdxPage} from '~/types'
@@ -251,17 +253,27 @@ function Image({
   )
 }
 
-function Link({children, ...rest}: JSX.IntrinsicElements['a']) {
+function MDXLink({href = '', children, ...rest}: JSX.IntrinsicElements['a']) {
+  if (href?.startsWith('/')) {
+    return (
+      <Link to={href} {...rest}>
+        {children}
+      </Link>
+    )
+  }
+
+  const isExternal = !href.startsWith('#')
+
   return (
-    <a target="_blank" rel="noopener noreferrer nofollow" {...rest}>
+    <Link external={isExternal} to={href} {...rest}>
       {children}
-    </a>
+    </Link>
   )
 }
 
 const mdxComponents = {
   Image,
-  a: Link,
+  a: MDXLink,
 }
 
 function getMdxComponent(code: string) {
