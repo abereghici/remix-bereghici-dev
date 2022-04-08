@@ -20,6 +20,7 @@ import type {AppAction, AppHandle, AppLoader, GithubUser, Post} from '~/types'
 import codeHighlightStyles from '~/styles/code-highlight.css'
 import BlogPostCommentInput from '~/components/blog-post-comment-input'
 import BlogPostComment from '~/components/blog-post-comment'
+import SpeechPost from '~/components/speech-post'
 import BlogPostCommentAuthenticate from '~/components/blog-post-comment-authenticate'
 
 export const links: LinksFunction = () => {
@@ -203,6 +204,7 @@ export default function FullArticle() {
   const Component = useMdxComponent(code)
 
   const readMarker = React.useRef<HTMLDivElement>(null)
+
   const markRead = useFetcher()
 
   const markReadRef = React.useRef(markRead)
@@ -245,6 +247,9 @@ export default function FullArticle() {
           {` • `}
           {views ?? 0} views
         </Paragraph>
+      </div>
+      <div className="mt-4">
+        <SpeechPost contentRef={readMarker} />
       </div>
       <div ref={readMarker} className="prose dark:prose-dark mt-9">
         <Component />
