@@ -12,15 +12,17 @@ export default function BlogPost({post}: {post: PostItem}) {
   return (
     <Link to={slug}>
       <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full flex flex-col overflow-hidden">
-        <img
-          className="w-full object-cover"
-          {...getImgProps(getImageBuilder(bannerCloudinaryId!, ''), {
-            widths: [480, 768],
-            sizes: ['(max-width: 767px) 100vw', '480px'],
-            transformations: {background: 'rgb:e6e9ee'},
-          })}
-          alt=""
-        />
+        {bannerCloudinaryId && (
+          <img
+            className="w-full object-cover"
+            {...getImgProps(getImageBuilder(bannerCloudinaryId, ''), {
+              widths: [480, 768],
+              sizes: ['(max-width: 767px) 100vw', '480px'],
+              transformations: {background: 'rgb:e6e9ee'},
+            })}
+            alt=""
+          />
+        )}
         <div className="flex flex-col p-3 flex-grow">
           <div className="flex flex-wrap mb-1">
             {categories.map(category => (
