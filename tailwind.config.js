@@ -135,5 +135,8 @@ module.exports = {
     },
   },
   content: [fromRoot('./app/**/*.+(js|ts|tsx|mdx|md)')],
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/line-clamp'),
+  ],
 }

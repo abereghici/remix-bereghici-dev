@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {json, LoaderFunction, useLoaderData} from 'remix'
+import {motion} from 'framer-motion'
 import {getAllPosts, getAllPostViewsCount} from '~/utils/blog.server'
 import {ServerError} from '~/components/errors'
 import {H1, Paragraph} from '~/components/typography'
@@ -36,11 +37,16 @@ export default function Index() {
       <Paragraph className="block mb-10" as="em">
         Total views: {totalViewsCount}
       </Paragraph>
-      <ul>
+      <ul className="grid grid-cols-1 gap-8 sm:grid-cols-2">
         {posts.map((post: PostItem) => (
-          <li key={post.slug}>
+          <motion.li
+            whileHover={{scale: 1.02}}
+            whileTap={{scale: 0.99}}
+            key={post.slug}
+            className="w-full"
+          >
             <BlogPost post={post} />
-          </li>
+          </motion.li>
         ))}
       </ul>
     </ResponsiveContainer>
