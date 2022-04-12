@@ -17,6 +17,7 @@ export default async function handleRequest(
   }
 
   const markup = renderToString(
+    // @ts-expect-error will be fixed in next major version
     <RemixServer context={remixContext} url={request.url} />,
   )
 
