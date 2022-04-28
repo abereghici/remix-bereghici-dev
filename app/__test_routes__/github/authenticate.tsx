@@ -1,4 +1,5 @@
-import {LoaderFunction, redirect} from 'remix'
+import type {LoaderFunction} from '@remix-run/node'
+import {redirect} from '@remix-run/node'
 import type {GithubUser} from '~/types'
 import {authenticator} from '~/utils/auth.server'
 import {commitSession, getSession} from '~/utils/session.server'

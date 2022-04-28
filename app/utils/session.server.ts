@@ -1,4 +1,5 @@
-import {createCookieSessionStorage, Session} from 'remix'
+import type {Session} from '@remix-run/node'
+import {createCookieSessionStorage} from '@remix-run/node'
 import {getRequiredServerEnvVar} from './misc'
 
 const sessionExpirationTime = 1000 * 60 * 60 * 24 * 365 // 1 year

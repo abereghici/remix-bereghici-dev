@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {Link} from 'remix'
+import {Link} from '@remix-run/react'
 import {Title, Paragraph} from '~/components/typography'
 import Tag from '~/components/tag'
 import type {PostItem} from '~/types'

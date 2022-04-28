@@ -1,7 +1,7 @@
 import * as React from 'react'
 import format from 'date-fns/format'
 import type {GithubUser, Comment} from '~/types'
-import {useFetcher} from 'remix'
+import {useFetcher} from '@remix-run/react'
 import {Paragraph} from './typography'
 
 type Props = {

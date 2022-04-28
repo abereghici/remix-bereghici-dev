@@ -1,4 +1,4 @@
-import type {EntryContext} from 'remix'
+import type {EntryContext} from '@remix-run/node'
 import type {AppHandle, AppSitemapEntry} from '~/types'
 import isEqual from 'lodash.isequal'
 import {getDomainUrl, removeTrailingSlash, typedBoolean} from '~/utils/misc'

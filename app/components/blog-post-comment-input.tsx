@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {useFetcher} from 'remix'
+import {useFetcher} from '@remix-run/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import {H5, Paragraph} from './typography'
 import Button from './button'

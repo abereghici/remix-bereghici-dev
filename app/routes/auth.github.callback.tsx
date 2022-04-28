@@ -1,4 +1,4 @@
-import type {LoaderFunction} from 'remix'
+import type {LoaderFunction} from '@remix-run/node'
 import type {AppHandle} from '~/types'
 import {authenticator} from '~/utils/auth.server'
 import {getSession} from '~/utils/session.server'

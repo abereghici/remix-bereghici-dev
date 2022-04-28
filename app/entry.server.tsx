@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {renderToString} from 'react-dom/server'
-import {RemixServer} from 'remix'
-import type {EntryContext} from 'remix'
+import {RemixServer} from '@remix-run/react'
+import type {EntryContext} from '@remix-run/node'
 import {routes as otherRoutes} from './other-routes.server'
 
 export default async function handleRequest(
@@ -17,7 +17,6 @@ export default async function handleRequest(
   }
 
   const markup = renderToString(
-    // @ts-expect-error will be fixed in next major version
     <RemixServer context={remixContext} url={request.url} />,
   )
 

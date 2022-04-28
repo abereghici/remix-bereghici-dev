@@ -1,6 +1,10 @@
 import * as React from 'react'
-import {json, LoaderFunction, useLoaderData} from 'remix'
-import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+import type {LoaderFunction} from '@remix-run/node'
+import {json} from '@remix-run/node'
+import {useLoaderData} from '@remix-run/react'
+
+import type {Timings} from '~/utils/metrics.server'
+import {getServerTimeHeader} from '~/utils/metrics.server'
 import ResponsiveContainer from '~/components/responsive-container'
 import {ServerError} from '~/components/errors'
 import {getMdxPage, mdxPageMeta, useMdxComponent} from '~/utils/mdx'

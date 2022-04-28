@@ -1,6 +1,6 @@
 import * as React from 'react'
 import clsx from 'clsx'
-import {Link} from 'remix'
+import {Link} from '@remix-run/react'
 import {Paragraph, Title} from './typography'
 import type {PostItem} from '~/types'
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
-import {RemixBrowser as Remix} from 'remix'
+import {RemixBrowser as Remix} from '@remix-run/react'
 import * as Sentry from '@sentry/browser'
 import {Integrations} from '@sentry/tracing'
 

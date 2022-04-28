@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {useMatches} from 'remix'
+import {useMatches} from '@remix-run/react'
 import type {SpotifySong} from '~/types'
 import Link from './link'
 

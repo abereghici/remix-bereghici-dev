@@ -1,6 +1,7 @@
 import * as React from 'react'
 import clsx from 'clsx'
-import {Link as RemixLink, LinkProps} from 'remix'
+import type {LinkProps} from '@remix-run/react'
+import {Link as RemixLink} from '@remix-run/react'
 
 type Props = LinkProps & {
   external?: boolean

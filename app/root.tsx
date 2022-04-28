@@ -1,26 +1,22 @@
 import * as React from 'react'
+import {json} from '@remix-run/node'
+import type {LoaderFunction, MetaFunction} from '@remix-run/node'
 import {
   Links,
   Meta,
   Scripts,
   Outlet,
   LiveReload,
-  LoaderFunction,
-  json,
   useLoaderData,
-  MetaFunction,
   ScrollRestoration,
   useCatch,
-} from 'remix'
-import type {LinksFunction} from 'remix'
-import {
-  ThemeProvider,
-  useTheme,
-  PreventFlashOnWrongTheme,
-  Theme,
-} from 'remix-themes'
+} from '@remix-run/react'
+import type {LinksFunction} from '@remix-run/node'
+import type {Theme} from 'remix-themes'
+import {ThemeProvider, useTheme, PreventFlashOnWrongTheme} from 'remix-themes'
 import {getDomainUrl, getDisplayUrl} from '~/utils/misc'
-import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+import type {Timings} from '~/utils/metrics.server'
+import {getServerTimeHeader} from '~/utils/metrics.server'
 import {getSocialMetas} from './utils/seo'
 import {getEnv} from '~/utils/env.server'
 import {themeSessionResolver} from './utils/theme.server'

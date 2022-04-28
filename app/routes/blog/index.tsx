@@ -1,5 +1,7 @@
 import * as React from 'react'
-import {json, LoaderFunction, useLoaderData} from 'remix'
+import type {LoaderFunction} from '@remix-run/node'
+import {json} from '@remix-run/node'
+import {useLoaderData} from '@remix-run/react'
 import {motion} from 'framer-motion'
 import {getAllPosts, getAllPostViewsCount} from '~/utils/blog.server'
 import {ServerError} from '~/components/errors'
@@ -7,7 +9,8 @@ import {H1, Paragraph} from '~/components/typography'
 import ResponsiveContainer from '~/components/responsive-container'
 import BlogPost from '~/components/blog-post'
 import type {PostItem} from '~/types'
-import {getServerTimeHeader, Timings} from '~/utils/metrics.server'
+import type {Timings} from '~/utils/metrics.server'
+import {getServerTimeHeader} from '~/utils/metrics.server'
 
 type LoaderData = {
   posts: PostItem[]

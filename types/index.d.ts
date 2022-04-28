@@ -1,9 +1,9 @@
 /// <reference types="@remix-run/dev" />
 /// <reference types="@remix-run/node/globals" />
 
-import type {ActionFunction, LoaderFunction} from 'remix'
-import calculateReadingTime from 'reading-time'
-import {GitHubProfile} from 'remix-auth-github'
+import type {ActionFunction, LoaderFunction} from '@remix-run/node'
+import type calculateReadingTime from 'reading-time'
+import type {GitHubProfile} from 'remix-auth-github'
 import type {Post as PrismaPost, Comment} from '@prisma/client'
 
 export type SpotifySong = {

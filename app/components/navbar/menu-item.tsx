@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {NavLink} from 'remix'
+import {NavLink} from '@remix-run/react'
 import clsx from 'clsx'
 
 export default function MenuItem({
