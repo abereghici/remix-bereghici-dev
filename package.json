@@ -17,7 +17,6 @@
     "cy:run": "cypress run",
     "dev": "pm2-dev ./other/pm2.config.js",
     "format": "prettier --write \"**/*.+(js|jsx|json|yml|yaml|css|less|scss|ts|tsx|md|gql|graphql|mdx|vue)\"",
-    "postinstall": "remix setup",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/.eslintcache --ext js,jsx,ts,tsx .",
     "prepare": "husky install",
     "setup": "npm install && docker compose up -d",
@@ -26,7 +25,7 @@
     "test": "jest --passWithNoTests",
     "test:e2e:dev": "cross-env RUNNING_E2E=true ENABLE_TEST_ROUTES=true start-server-and-test dev http-get://localhost:3000/build/info.json cy:open",
     "test:e2e:run": "cross-env RUNNING_E2E=true PORT=8811 start-server-and-test start:mocks http-get://localhost:8811/build/info.json cy:run",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b && tsc -b cypress",
     "validate": "./other/validate"
   },
   "eslintIgnore": [
@@ -44,6 +43,8 @@
     "@prisma/client": "^3.6.0",
     "@remix-run/express": "1.4.3",
     "@remix-run/react": "1.4.3",
+    "@remix-run/node": "1.4.3",
+    "@remix-run/server-runtime": "1.4.3",
     "@sentry/browser": "^6.16.1",
     "@sentry/node": "^6.16.1",
     "@sentry/tracing": "^6.16.1",
@@ -78,7 +79,6 @@
     "rehype-prism-plus": "^1.1.3",
     "rehype-slug": "^5.0.0",
     "remark-gfm": "^3.0.1",
-    "remix": "1.4.3",
     "remix-auth": "^3.2.1",
     "remix-auth-github": "^1.0.0",
     "remix-themes": "^1.1.4"
@@ -87,7 +87,6 @@
     "@cld-apis/types": "^0.1.3",
     "@remix-run/dev": "1.4.3",
     "@remix-run/eslint-config": "1.4.3",
-    "@remix-run/node": "1.4.3",
     "@testing-library/cypress": "^8.0.2",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
@@ -123,7 +122,7 @@
     "rimraf": "^3.0.2",
     "start-server-and-test": "^1.14.0",
     "tailwindcss": "^3.0.7",
-    "typescript": "4.5.4"
+    "typescript": "4.6.2"
   },
   "engines": {
     "node": "16",

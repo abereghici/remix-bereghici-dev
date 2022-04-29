@@ -1,4 +1,9 @@
 {
-  "extends": "../other/shared-tsconfig.json",
-  "include": ["./**/*"]
+  "extends": "../tsconfig.json",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "paths": {
+      "~/*": ["../app/*"]
+    }
+  }
 }

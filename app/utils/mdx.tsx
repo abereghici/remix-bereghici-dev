@@ -8,7 +8,8 @@ import {
   downloadDirList,
   downloadMdxFileOrDirectory,
 } from '~/utils/github.server'
-import {cachified, CachifiedOptions} from '~/utils/cache.server'
+import type {CachifiedOptions} from '~/utils/cache.server'
+import {cachified} from '~/utils/cache.server'
 import {getSocialMetas} from '~/utils/seo'
 
 import Link from '~/components/link'

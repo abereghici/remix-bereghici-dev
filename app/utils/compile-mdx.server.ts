@@ -1,6 +1,7 @@
 import {bundleMDX} from 'mdx-bundler'
 import type TPQueue from 'p-queue'
-import calculateReadingTime, {ReadTimeResults} from 'reading-time'
+import type {ReadTimeResults} from 'reading-time'
+import calculateReadingTime from 'reading-time'
 import type {GitHubFile} from '~/types'
 
 async function compileMdx<FrontmatterType extends Record<string, unknown>>(

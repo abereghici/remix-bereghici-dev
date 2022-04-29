@@ -1,7 +1,8 @@
 import formatDuration from 'date-fns/formatDuration'
 import intervalToDuration from 'date-fns/intervalToDuration'
 import {performance} from 'perf_hooks'
-import {time, Timings} from '~/utils/metrics.server'
+import type {Timings} from '~/utils/metrics.server'
+import {time} from '~/utils/metrics.server'
 
 function niceFormatDuration(milliseconds: number) {
   const duration = intervalToDuration({start: 0, end: milliseconds})

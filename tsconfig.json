@@ -1,12 +1,27 @@
 {
-  "files": [],
-  "exclude": ["node_modules"],
-  "extends": "./other/shared-tsconfig.json",
-  "references": [
-    {"path": "types"},
-    {"path": "app"},
-    {"path": "server"},
-    {"path": "mocks"},
-    {"path": "cypress"}
-  ]
+  "exclude": ["./cypress"],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "compilerOptions": {
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "incremental": true,
+    "isolatedModules": true,
+    "importsNotUsedAsValues": "error",
+    "noEmit": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "module": "es2020",
+    "target": "es2020",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["./types", "./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./app/*"]
+    }
+  }
 }

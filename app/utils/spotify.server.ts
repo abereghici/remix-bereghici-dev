@@ -1,5 +1,6 @@
 import type {SpotifySong} from '~/types'
-import {cachified, CachifiedOptions} from './cache.server'
+import type {CachifiedOptions} from './cache.server'
+import {cachified} from './cache.server'
 import {redisCache} from './redis.server'
 
 const client_id = process.env.SPOTIFY_CLIENT_ID

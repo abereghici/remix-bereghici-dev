@@ -1,4 +1,5 @@
-import {cachified, CachifiedOptions} from './cache.server'
+import type {CachifiedOptions} from './cache.server'
+import {cachified} from './cache.server'
 import {getRepositoriesContributedTo} from './github.server'
 import {redisCache} from './redis.server'
 
