@@ -1,0 +1,47 @@
+---
+title: Retrieving AWS SSM Parameters with Node
+date: 2022-05-03
+categories:
+  - node
+  - aws
+  - javascript
+  - snippets
+meta:
+  keywords:
+    - aws
+    - node
+    - ssm
+    - javascript
+    - param store
+bannerCloudinaryId: bereghici-dev/snippets/aws_logo_smile_1200x630_nnavfk.png
+---
+
+SSM (Systems Manager) is a service provided by AWS that allows you to securely
+store and retrieve data for your application (amongst other things). This can be
+environment based connection urls, authentication credentials, or properties
+you’d like to change without needing a re-deploy of your application.
+
+In SSM you can store strings, list of strings and encrypted strings. Also, you
+can store as JSON and later serialize it to a javascript object.
+
+```javascript
+import SSM from 'aws-sdk/clients/ssm'
+
+const ssm = new SSM()
+
+export async function loadParameter(parameterName: string) {
+  try {
+    const {Parameter} = await ssm
+      .getParameter({
+        Name: `/your/namespace/${parameterName}`,
+        WithDecryption: true,
+      })
+      .promise()
+
+    return Parameter?.Value ?? null
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
+```
