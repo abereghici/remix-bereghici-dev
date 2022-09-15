@@ -23,7 +23,7 @@ async function getRssFeedXml(request: Request) {
             <item>
               <title>${cdata(post.frontmatter.title)}</title>
               <description>${cdata(post.frontmatter.description)}</description>
-              <pubDate>${new Date(post.date).toUTCString()}</pubDate>
+              <pubDate>${new Date(post.frontmatter.date).toUTCString()}</pubDate>
               <link>${blogUrl}/${post.slug}</link>
               <guid>${blogUrl}/${post.slug}</guid>
             </item>
