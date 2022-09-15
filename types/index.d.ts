@@ -109,7 +109,6 @@ export {
   Post,
   Comment,
   PostItem,
-  PostViews,
   AppSitemapEntry,
   AppHandle,
 }

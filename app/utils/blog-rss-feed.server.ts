@@ -1,4 +1,3 @@
-import * as dateFns from 'date-fns'
 import {getBlogMdxListItems} from '~/utils/mdx'
 import {getDomainUrl} from '~/utils/misc'
 
@@ -23,7 +22,9 @@ async function getRssFeedXml(request: Request) {
             <item>
               <title>${cdata(post.frontmatter.title)}</title>
               <description>${cdata(post.frontmatter.description)}</description>
-              <pubDate>${new Date(post.frontmatter.date).toUTCString()}</pubDate>
+              <pubDate>${new Date(
+                post.frontmatter.date,
+              ).toUTCString()}</pubDate>
               <link>${blogUrl}/${post.slug}</link>
               <guid>${blogUrl}/${post.slug}</guid>
             </item>
