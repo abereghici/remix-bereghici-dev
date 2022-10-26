@@ -10,7 +10,7 @@ export default function BlogPost({post}: {post: PostItem}) {
   const {title, description, categories, bannerCloudinaryId} = frontmatter
 
   return (
-    <Link to={slug}>
+    <Link to={`/blog/${slug}`}>
       <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full flex flex-col overflow-hidden">
         {bannerCloudinaryId && (
           <img
