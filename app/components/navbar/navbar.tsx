@@ -18,7 +18,7 @@ export default function NavBar() {
         <MobileMenu />
         <ul className="flex items-center -ml-2">
           {LINKS.map(link => (
-            <NavLink key={link.name} to={link.to}>
+            <NavLink key={link.name} to={link.to} end={link.to === '/'}>
               {link.name}
             </NavLink>
           ))}
