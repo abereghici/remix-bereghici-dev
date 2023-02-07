@@ -1,4 +1,3 @@
-import * as React from 'react'
 import type {LoaderFunction} from '@remix-run/node'
 import {json} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
@@ -32,7 +31,7 @@ export const loader: LoaderFunction = async ({request}) => {
 }
 
 export default function Index() {
-  const {posts, totalViewsCount} = useLoaderData<LoaderData>()
+  const {posts, totalViewsCount} = useLoaderData() as unknown as LoaderData
 
   return (
     <ResponsiveContainer>
@@ -41,7 +40,7 @@ export default function Index() {
         Total views: {totalViewsCount}
       </Paragraph>
       <ul className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-        {posts.map((post: PostItem) => (
+        {posts.map(post => (
           <motion.li
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.99}}

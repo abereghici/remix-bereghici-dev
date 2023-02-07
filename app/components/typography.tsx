@@ -5,7 +5,7 @@ type Variant = 'primary' | 'secondary' | 'inverse' | 'danger'
 
 type TitleProps = {
   variant?: Variant
-  as?: React.ElementType
+  as?: React.ElementType | string
   className?: string
   id?: string
 } & (

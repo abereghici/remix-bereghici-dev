@@ -1,14 +1,13 @@
-import * as React from 'react'
 import {renderToString} from 'react-dom/server'
+import type {RemixServerProps} from '@remix-run/react'
 import {RemixServer} from '@remix-run/react'
-import type {EntryContext} from '@remix-run/node'
 import {routes as otherRoutes} from './other-routes.server'
 
 export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext,
+  remixContext: RemixServerProps['context'],
 ) {
   for (const handler of otherRoutes) {
     // eslint-disable-next-line no-await-in-loop

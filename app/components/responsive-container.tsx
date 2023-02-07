@@ -1,10 +1,11 @@
 import * as React from 'react'
 import clsx from 'clsx'
 
-interface Props extends React.HTMLAttributes<HTMLElement> {
-  as?: React.ElementType
+interface Props {
+  as?: React.ElementType | string
+  className?: string
+  children?: React.ReactNode
 }
-
 const ResponsiveContainer = React.forwardRef<HTMLElement, Props>(
   function ResponsiveContainer(
     {children, as: Component = 'div', className},

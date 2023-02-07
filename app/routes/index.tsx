@@ -1,4 +1,3 @@
-import * as React from 'react'
 import type {LoaderFunction} from '@remix-run/node'
 import {json} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
@@ -52,14 +51,14 @@ const gradients = [
 ]
 
 export default function IndexRoute() {
-  const {posts, contributedRepos} = useLoaderData<LoaderData>()
+  const {posts, contributedRepos} = useLoaderData() as unknown as LoaderData
 
   return (
     <ResponsiveContainer>
       <Hero />
       <H2 className="mb-6 tracking-tight">Latest Posts</H2>
       <div className="flex flex-col gap-6">
-        {posts.map((post: PostItem, index: number) => (
+        {posts.map((post, index) => (
           <motion.div
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.99}}

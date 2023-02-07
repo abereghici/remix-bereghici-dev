@@ -1,10 +1,10 @@
-import type {EntryContext} from '@remix-run/node'
 import {getSitemapXml} from '~/utils/sitemap.server'
 import {getRssFeedXml} from '~/utils/blog-rss-feed.server'
+import type {RemixServerProps} from '@remix-run/react'
 
 type Handler = (
   request: Request,
-  remixContext: EntryContext,
+  remixContext: RemixServerProps['context'],
 ) => Promise<Response | null> | null
 
 // Just made it this way to make it easier to check for handled routes in
@@ -32,7 +32,7 @@ const pathedRoutes: Record<string, Handler> = {
 
 const routes: Array<Handler> = [
   ...Object.entries(pathedRoutes).map(([path, handler]) => {
-    return (request: Request, remixContext: EntryContext) => {
+    return (request: Request, remixContext: RemixServerProps['context']) => {
       if (new URL(request.url).pathname !== path) return null
 
       return handler(request, remixContext)

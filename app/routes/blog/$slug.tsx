@@ -200,7 +200,7 @@ export const loader: AppLoader<{slug: string}> = async ({request, params}) => {
 }
 
 export default function FullArticle() {
-  const {page, auth} = useLoaderData<LoaderData>()
+  const {page, auth} = useLoaderData() as unknown as LoaderData
   const {frontmatter, readTime, code, views, comments} = page
   const {title, date, draft} = frontmatter
 

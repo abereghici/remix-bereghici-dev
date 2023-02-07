@@ -1,9 +1,12 @@
-import type {EntryContext} from '@remix-run/node'
 import type {AppHandle, AppSitemapEntry} from '~/types'
 import isEqual from 'lodash.isequal'
 import {getDomainUrl, removeTrailingSlash, typedBoolean} from '~/utils/misc'
+import type {RemixServerProps} from '@remix-run/react'
 
-async function getSitemapXml(request: Request, remixContext: EntryContext) {
+async function getSitemapXml(
+  request: Request,
+  remixContext: RemixServerProps['context'],
+) {
   const domainUrl = getDomainUrl(request)
 
   function getEntry({route, lastmod, changefreq, priority}: AppSitemapEntry) {
