@@ -81,7 +81,7 @@
     "remark-gfm": "^3.0.1",
     "remix-auth": "^3.2.1",
     "remix-auth-github": "^1.0.0",
-    "remix-themes": "^1.2.1"
+    "remix-themes": "^1.4.0"
   },
   "devDependencies": {
     "@cld-apis/types": "^0.1.3",
